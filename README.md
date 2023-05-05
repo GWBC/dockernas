@@ -30,3 +30,12 @@ docker build . -t dockernas
 #多平台构建，构建后直接push到dockerhub
 docker buildx build --platform linux/arm64,linux/amd64 -t xiongzhanzhang/dockernas:latest . --push
 ```
+
+## docker开启远程
+```sh
+#ubuntu
+vi /lib/systemd/system/docker.service 
+[Service] -> ExecStart 添加： -H tcp://0.0.0.0:2375
+systemctl daemon-reload 
+systemctl restart docker
+```
