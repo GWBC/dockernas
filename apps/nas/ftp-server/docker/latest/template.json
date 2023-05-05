@@ -1,0 +1,29 @@
+{
+	"imageUrl": "fclairamb/ftpserver",
+	"privileged": false,
+	"portParams": [{
+			"prompt": "服务端口",
+			"key": "2121",
+			"value": "2121",
+			"protocol": "ftp"
+		},
+		{
+			"prompt": "数据端口",
+			"key": "2122-2130",
+			"value": "2122-2130",
+			"protocol": "tcp"
+		}
+	],
+	"localVolume": [{
+		"prompt": "config数据目录",
+		"key": "/app",
+		"value": "",
+		"name": "config"
+	}],
+	"dfsVolume": [{
+		"prompt": "上传文件位置",
+		"key": "/tmp",
+		"value": "",
+		"name": "upload"
+	}]
+}

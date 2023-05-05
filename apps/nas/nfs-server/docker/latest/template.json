@@ -1,7 +1,6 @@
 {
     "imageUrl":"itsthenetwork/nfs-server-alpine:latest",
     "privileged":true,
-    "osList":"linux",
     "portParams":[
         {
             "prompt":"nfs访问端口",

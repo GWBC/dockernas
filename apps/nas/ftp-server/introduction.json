@@ -1,0 +1,8 @@
+{
+  "name": "ftp-server",
+  "category": [
+    "网络",
+    "NAS"
+  ],
+  "summary": "请使用host网络模式，桥接模式需要配置ftpserver.json，添加 \"public_host\": \"192.168.30.66\""
+}
