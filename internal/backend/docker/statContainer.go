@@ -15,7 +15,7 @@ import (
 
 func GetContainerStatus() []models.ContainerStat {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)

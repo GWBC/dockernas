@@ -30,6 +30,7 @@ type Instance struct {
 	InstanceParamStr string `json:"instanceParamStr" gorm:"type:varchar(1024)"` //store json str
 	CreateTime       int64  `json:"createTime"`
 	ImagePullState   string `json:"imagePullState"`
+	DockerSvrIP      string `json:"dockerSvrIP"`
 }
 
 func AddInstance(instance *Instance) {
@@ -70,6 +71,20 @@ func GetInstance() []Instance {
 func GetInstanceByName(name string) *Instance {
 	var instance Instance
 	err := GetDb().First(&instance, "name=?", name).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		log.Println(err)
+		panic(err)
+	}
+
+	return &instance
+}
+
+func GetInstanceByID(id string) *Instance {
+	var instance Instance
+	err := GetDb().First(&instance, "container_id=?", id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil

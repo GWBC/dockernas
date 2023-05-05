@@ -18,7 +18,7 @@
         <div v-if="instance.state == 0" style="color: green">
           拉取镜像 {{ instance.imagePullState }}
         </div>
-        <div v-if="instance.state == 1" style="color: yellow">创建失败</div>
+        <div v-if="instance.state == 1" style="color: red">创建失败</div>
         <div v-if="instance.state == 2" style="color: red">运行失败</div>
         <div v-if="instance.state == 3" style="color: green">运行中</div>
         <div v-if="instance.state == 4" style="color: gray">已停止</div>
@@ -48,7 +48,7 @@
       >
         <div class="table_first_input">{{ param.prompt }}</div>
         <div v-if="param.protocol == 'http'">
-          <a target="_blank" :href="getInstanceWebUrl(instanceParam, param)">{{ getInstancePortText(instanceParam, param) }}</a>
+          <a target="_blank" :href="getInstanceWebUrl2(instance, instanceParam, param)">{{ getInstancePortText(instanceParam, param) }}</a>
         </div>
         <div v-if="param.protocol != 'http'">{{ getInstancePortText(instanceParam, param) }}</div>
       </div>
@@ -143,7 +143,7 @@
 </template>
 
 <script>
-import {getInstancePortText, getInstanceWebUrl} from "../../utils/url";
+import {getInstancePortText, getInstanceWebUrl, getInstanceWebUrl2} from "../../utils/url";
 import createInstance from "../createInstance.vue";
 import {
   stopInstance,
@@ -170,6 +170,7 @@ export default {
   },
   methods: {
     getInstanceWebUrl,
+    getInstanceWebUrl2,
     getInstancePortText,
     initData(instance) {
       this.instance = instance;

@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-var appMap = map[string]models.App{}
+var appMap = map[string]*models.App{}
+var appMap2 = map[string]*models.App{}
 
 func GetApps() []models.App {
 	apps := []models.App{}
@@ -22,7 +23,7 @@ func GetApps() []models.App {
 	} else {
 		for _, fi1 := range dir1 {
 			if fi1.IsDir() {
-				dir2, err2 := ioutil.ReadDir(filepath.Join("./apps", fi1.Name()))
+				dir2, err2 := ioutil.ReadDir(filepath.ToSlash(filepath.Join("./apps", fi1.Name())))
 				if err2 != nil {
 					log.Println("list dir error", err2)
 				} else {
@@ -45,7 +46,7 @@ func GetApps() []models.App {
 	} else {
 		for _, fi1 := range dir1 {
 			if fi1.IsDir() {
-				dir2, err2 := ioutil.ReadDir(filepath.Join(config.GetExtraAppPath(), fi1.Name()))
+				dir2, err2 := ioutil.ReadDir(filepath.ToSlash(filepath.Join(config.GetExtraAppPath(), fi1.Name())))
 				if err2 != nil {
 					log.Println("list dir error", err2)
 				} else {
@@ -62,11 +63,19 @@ func GetApps() []models.App {
 		}
 	}
 
-	for k := range appMap {
-		delete(appMap, k)
-	}
+	appMap = make(map[string]*models.App, 0)
+	appMap2 = make(map[string]*models.App, 0)
+
 	for _, app := range apps {
-		appMap[app.Name] = app
+		tApp := app
+		appMap[app.Name] = &tApp
+		for _, v := range app.DockerVersions {
+			index := strings.Index(v.ImageUrl, ":")
+			if index < 0 {
+				v.ImageUrl += ":latest"
+			}
+			appMap2[v.ImageUrl] = &tApp
+		}
 	}
 
 	return apps
@@ -83,6 +92,36 @@ func GetAppByName(name string, flush bool) *models.App {
 
 	GetApps()
 	return GetAppByName(name, false)
+}
+
+func GetAppByImage(image string) (*models.App, *models.DockerTemplate) {
+	app, ok := appMap2[image]
+	if ok {
+		app = GetAppByNameAndPath(app.Name, config.GetAbsolutePath(app.Path)) //get lastest data on disk
+		var template *models.DockerTemplate = nil
+
+		if app != nil {
+			for _, v := range app.DockerVersions {
+				index := strings.Index(v.ImageUrl, ":")
+				if index < 0 {
+					v.ImageUrl += ":latest"
+				}
+
+				if v.ImageUrl == image {
+					template = &v
+					break
+				}
+			}
+
+			if template == nil {
+				template = &app.DockerVersions[0]
+			}
+		}
+
+		return app, template
+	}
+
+	return nil, nil
 }
 
 func GetAppByNameAndPath(name string, path string) *models.App {

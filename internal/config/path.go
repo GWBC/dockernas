@@ -6,21 +6,12 @@ import (
 	"strings"
 )
 
-// func GetBasePath() string {
-// 	basePath, err := os.Getwd()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	basePath = filepath.Join(basePath, "data")
-// 	return basePath
-// }
-
 func GetBasePath() string {
 	basePath := GetConfig("basePath", "")
 	if basePath == "" {
 		panic("base data path is not set")
 	}
-	return basePath
+	return filepath.ToSlash(basePath)
 }
 
 func IsBasePathSet() bool {
@@ -31,7 +22,7 @@ func SetBasePath(path string) {
 	if IsBasePathSet() {
 		panic("base data path has set")
 	}
-	SetConfig("basePath", path)
+	SetConfig("basePath", filepath.ToSlash(path))
 	SaveConfig()
 	InitLogger()
 }
@@ -39,38 +30,38 @@ func SetBasePath(path string) {
 func GetFullDfsPath(path string) string {
 	basePath := GetBasePath()
 	basePath = filepath.Join(basePath, "dfs", path)
-	return basePath
+	return filepath.ToSlash(basePath)
 }
 
 func GetDBFilePath() string {
 	basePath := GetBasePath()
 	basePath = filepath.Join(basePath, "meta")
 	utils.CheckCreateDir(basePath)
-	return filepath.Join(basePath, "data.db3")
+	return filepath.ToSlash(filepath.Join(basePath, "data.db3"))
 }
 
 func GetExtraAppPath() string {
 	basePath := GetBasePath()
 	basePath = filepath.Join(basePath, "apps")
 	utils.CheckCreateDir(basePath)
-	return basePath
+	return filepath.ToSlash(basePath)
 }
 
 func GetAppLocalPath(instanceName string) string {
 	basePath := GetBasePath()
 	basePath = filepath.Join(basePath, "local", instanceName)
-	return basePath
+	return filepath.ToSlash(basePath)
 }
 
 func GetAppLocalFilePath(instanceName string, fileName string) string {
-	return filepath.Join(GetAppLocalPath(instanceName), fileName)
+	return filepath.ToSlash(filepath.Join(GetAppLocalPath(instanceName), fileName))
 }
 
 func GetLocalVolumePath(instanceName string, volumeName string) string {
 	basePath := GetBasePath()
 	basePath = filepath.Join(basePath, "local", instanceName, volumeName)
 	utils.CheckCreateDir(basePath)
-	return basePath
+	return filepath.ToSlash(basePath)
 }
 
 func GetRelativePath(path string) string {
@@ -78,6 +69,7 @@ func GetRelativePath(path string) string {
 		return path
 	}
 	basePath := filepath.Join(GetBasePath(), "")
+	basePath = filepath.ToSlash(basePath)
 	if strings.Index(path, basePath) == 0 {
 		return path[len(basePath):]
 	}
@@ -89,9 +81,9 @@ func GetAbsolutePath(path string) string {
 	if path[0] == '.' {
 		return path
 	}
-	return filepath.Join(GetBasePath(), path)
+	return filepath.ToSlash(filepath.Join(GetBasePath(), path))
 }
 
 func GetAppMountFilePath(path string, fileName string) string {
-	return filepath.Join(GetAbsolutePath(path), fileName)
+	return filepath.ToSlash(filepath.Join(GetAbsolutePath(path), fileName))
 }

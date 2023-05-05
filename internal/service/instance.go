@@ -9,9 +9,12 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"net/url"
 	"os"
 	"regexp"
 	"runtime/debug"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -42,7 +45,94 @@ func CheckParamIsValid(param models.InstanceParam) {
 	CheckIsPortUsed(param)
 }
 
+func AutoAddInstance() {
+	containerList := docker.ListContainer()
+	for _, container := range containerList {
+		instance := models.GetInstanceByID(container.ID)
+		if instance == nil {
+			index := strings.Index(container.Image, ":")
+			if index < 0 {
+				container.Image += ":latest"
+			}
+
+			app, template := GetAppByImage(container.Image)
+			if app == nil {
+				continue
+			}
+
+			instance = &models.Instance{}
+			instance.AppName = app.Name
+			instance.Version = template.Version
+			instance.IconUrl = app.IconUrl
+
+			if container.State == "running" {
+				instance.State = models.RUNNING
+			} else {
+				instance.State = models.STOPPED
+			}
+
+			instance.Summary = "自动添加"
+
+			name := strings.Split(container.Names[0], "/")
+			if len(name) == 0 {
+				continue
+			}
+			instance.Name = name[len(name)-1]
+			instance.ContainerID = container.ID
+			instance.CreateTime = container.Created * 1000
+
+			//////////////////////////////////////////////////////////////
+			instanceParam := models.InstanceParam{}
+			instanceParam.Name = instance.Name
+			instanceParam.NetworkMode = container.HostConfig.NetworkMode
+			instanceParam.AppName = instance.AppName
+			instanceParam.Summary = instance.Summary
+			instanceParam.DockerTemplate = *template
+
+			for _, port := range container.Ports {
+				for i, t := range instanceParam.DockerTemplate.PortParams {
+					if t.Key == strconv.Itoa(int(port.PrivatePort)) {
+						if t.Protocol == "http" {
+							t.Protocol = "tcp"
+						}
+
+						if port.Type == t.Protocol {
+							instanceParam.DockerTemplate.PortParams[i].Value = strconv.Itoa(int(port.PublicPort))
+							break
+						}
+					}
+				}
+			}
+
+			for _, mount := range container.Mounts {
+				for i, volume := range instanceParam.DockerTemplate.LocalVolume {
+					if mount.Destination == volume.Key {
+						instanceParam.DockerTemplate.LocalVolume[i].Value = mount.Source
+						break
+					}
+				}
+
+				for i, volume := range instanceParam.DockerTemplate.DfsVolume {
+					if mount.Destination == volume.Key {
+						instanceParam.DockerTemplate.DfsVolume[i].Value = mount.Source
+						break
+					}
+				}
+			}
+
+			strInstanceParam, e := json.Marshal(&instanceParam)
+			if e == nil {
+				instance.InstanceParamStr = string(strInstanceParam)
+			}
+
+			models.AddInstance(instance)
+		}
+	}
+}
+
 func GetInstance() []models.Instance {
+	AutoAddInstance()
+
 	instances := models.GetInstance()
 
 	networkInfo := GetNetworkInfo()
@@ -155,6 +245,17 @@ func GetInstanceByName(name string) models.Instance {
 		var param models.InstanceParam
 		if utils.GetObjFromJson(instance.InstanceParamStr, &param) != nil {
 			instance.ImagePullState = GetImagePullState(param.ImageUrl)
+		}
+	}
+
+	instance.DockerSvrIP = config.GetConfig("dockerSvrIP", "")
+	if len(instance.DockerSvrIP) != 0 {
+		instance.DockerSvrIP = "tcp://" + instance.DockerSvrIP
+		urlObj, e := url.Parse(instance.DockerSvrIP)
+		if e != nil {
+			instance.DockerSvrIP = ""
+		} else {
+			instance.DockerSvrIP = urlObj.Hostname()
 		}
 	}
 	return *instance

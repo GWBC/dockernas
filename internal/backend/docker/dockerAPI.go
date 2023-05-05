@@ -18,9 +18,22 @@ import (
 	"github.com/docker/go-connections/nat"
 )
 
+func ConnDocker() (*client.Client, error) {
+	ip := config.GetConfig("dockerSvrIP", "")
+	if len(ip) == 0 {
+		return client.NewClientWithOpts(client.FromEnv,
+			client.WithAPIVersionNegotiation())
+	}
+
+	ip = "tcp://" + ip
+	return client.NewClientWithOpts(client.FromEnv,
+		client.WithAPIVersionNegotiation(),
+		client.WithHost(ip))
+}
+
 func Delete(containerID string) error {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return err
@@ -37,7 +50,7 @@ func Delete(containerID string) error {
 
 func Stop(containerID string) error {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return err
@@ -56,7 +69,7 @@ func Stop(containerID string) error {
 
 func Start(containerID string) error {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return err
@@ -73,7 +86,7 @@ func Start(containerID string) error {
 
 func Restart(containerID string) error {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return err
@@ -91,7 +104,7 @@ func Restart(containerID string) error {
 
 func PullImage(imageUrl string) (io.ReadCloser, error) {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return nil, err
@@ -108,7 +121,7 @@ func PullImage(imageUrl string) (io.ReadCloser, error) {
 
 func DelImage(imageId string) {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)
@@ -122,7 +135,7 @@ func DelImage(imageId string) {
 
 func ListImage() []models.ImageInfo {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)
@@ -150,7 +163,7 @@ func ListImage() []models.ImageInfo {
 
 func ListContainer() []types.Container {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)
@@ -175,7 +188,7 @@ func IsContainerExist(containerID string) bool {
 
 func GetContainerInspect(containerID string) types.ContainerJSON {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)
@@ -199,7 +212,7 @@ func Create(param *models.InstanceParam) (string, error) {
 	}
 
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return "", err
@@ -227,7 +240,7 @@ func Create(param *models.InstanceParam) (string, error) {
 
 func GetContainerStat(id string) (types.ContainerStats, error) {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)
@@ -395,7 +408,7 @@ func buildConfig(param *models.InstanceParam) (container.Config, container.HostC
 
 func GetLog(containerID string) string {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)
@@ -416,7 +429,7 @@ func GetLog(containerID string) string {
 
 func GetDockerVersion() types.Version {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)
@@ -442,7 +455,7 @@ func DetectRealSystem() string {
 
 func Exec(container string, columns string) types.HijackedResponse {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		panic(err)

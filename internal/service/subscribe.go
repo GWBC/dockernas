@@ -42,7 +42,7 @@ func UpdateSubscribe() {
 }
 
 func getSubscribeRepositoryPath(name string) string {
-	return filepath.Join(config.GetExtraAppPath(), name)
+	return filepath.ToSlash(filepath.Join(config.GetExtraAppPath(), name))
 }
 
 func pullSubscribe(subscribe models.Subscribe) {

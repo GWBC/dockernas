@@ -2,9 +2,9 @@ package docker
 
 import (
 	"context"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	"log"
+
+	"github.com/docker/docker/api/types"
 )
 
 func GetDockerNasNetworkName() string {
@@ -13,7 +13,7 @@ func GetDockerNasNetworkName() string {
 
 func IsNetworkExist() (bool, error) {
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return false, err
@@ -44,7 +44,7 @@ func CheckNetwork() error {
 	}
 
 	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := ConnDocker()
 	if err != nil {
 		log.Println("create docker client error")
 		return err

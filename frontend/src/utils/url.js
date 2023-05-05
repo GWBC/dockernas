@@ -11,6 +11,23 @@ export const getInstanceWebUrl = (instanceParam, portParamItem) => {
     return "http://" + window.location.hostname + ":" + portParamItem.value
 }
 
+export const getInstanceWebUrl2 = (instance, instanceParam, portParamItem) => {
+    let hostname = instance.dockerSvrIP;
+    if (hostname.lenght == 0)
+    {
+        hostname = window.location.hostname;
+    }
+
+    if (instanceParam.networkMode === "host") {
+        return "http://" + hostname + ":" + portParamItem.key;
+    }
+    if (portParamItem.value === "" || instanceParam.networkMode === "nobund") {
+        return null;
+    }
+    // return window.location.protocol + "//"+hostname+":"+port
+    return "http://" + hostname+ ":" + portParamItem.value
+}
+
 export const getInstancePortText = (instanceParam, portParamItem) => {
     if (instanceParam.networkMode === "host") {
         return portParamItem.key;

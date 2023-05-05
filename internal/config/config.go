@@ -26,11 +26,10 @@ func InitConfig() {
 		}
 	} else {
 		SetConfig("user", "admin")
-		SetConfig("passwd", utils.GenPasswd())
+		SetConfig("passwd", "zhang")
 		SetConfig("bindAddr", "0.0.0.0:8080")
-		if IsRunInConainer() {
-			SetConfig("basePath", "/home/dockernas/data")
-		}
+		SetConfig("basePath", "/home/data")
+		SetConfig("dockerSvrIP", "")
 		SaveConfig()
 	}
 }
