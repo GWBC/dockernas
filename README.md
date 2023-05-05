@@ -1,6 +1,3 @@
-![GitHub CI](https://github.com/xiongzhanzhang/dockernas/actions/workflows/docker-image.yml/badge.svg)
-![](https://img.shields.io/badge/version-0.3.0-brightgreen.svg)
-
 ## 简介
 基于docker的NAS系统，特点是简单、免费开源、跨平台
 
@@ -33,16 +30,3 @@ docker build . -t dockernas
 #多平台构建，构建后直接push到dockerhub
 docker buildx build --platform linux/arm64,linux/amd64 -t xiongzhanzhang/dockernas:latest . --push
 ```
-
-## 版本记录
-### [0.3.0] 发布日期: 2023-02-18
-- 支持多种网络模式
-- 前端样式优化
-- 应用模板支持配置运行容器的user
-### [0.2.0] 发布日期: 2023-02-11
-- 移动端适配
-- pwa配置
-- 部分bug修复
-
-## 感谢JetBrains对本项目的支持
-<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg">
