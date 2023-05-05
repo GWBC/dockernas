@@ -8,6 +8,8 @@ import (
 	"dockernas/internal/utils"
 	"io"
 	"log"
+	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -56,7 +58,7 @@ func Stop(containerID string) error {
 		return err
 	}
 
-	timeoutSecond := time.Second * 120
+	timeoutSecond := time.Second * 10
 	err = cli.ContainerStop(ctx, containerID, &timeoutSecond)
 
 	if err != nil {
@@ -358,11 +360,42 @@ func buildConfig(param *models.InstanceParam) (container.Config, container.HostC
 			if item.Protocol == "udp" {
 				proto = "udp"
 			}
-			natPort, _ := nat.NewPort(proto, item.Key)
-			exports[natPort] = struct{}{}
-			portList := make([]nat.PortBinding, 0, 1)
-			portList = append(portList, nat.PortBinding{HostIP: hostIp, HostPort: item.Value})
-			netPort[natPort] = portList
+
+			sportList := make([]int, 0)
+			sports := strings.Split(item.Key, "-")
+			if len(sports) == 2 {
+				start, _ := strconv.Atoi(sports[0])
+				end, _ := strconv.Atoi(sports[1])
+				for i := start; i <= end; i++ {
+					sportList = append(sportList, i)
+				}
+			} else {
+				start, _ := strconv.Atoi(sports[0])
+				sportList = append(sportList, start)
+			}
+
+			dportList := make([]int, 0)
+			dports := strings.Split(item.Value, "-")
+			if len(sports) == 2 {
+				start, _ := strconv.Atoi(dports[0])
+				end, _ := strconv.Atoi(dports[1])
+				for i := start; i <= end; i++ {
+					dportList = append(dportList, i)
+				}
+			} else {
+				start, _ := strconv.Atoi(dports[0])
+				dportList = append(dportList, start)
+			}
+
+			mlen := int(math.Min(float64(len(sportList)), float64(len(dportList))))
+			for i := 0; i < mlen; i++ {
+				natPort, _ := nat.NewPort(proto, strconv.Itoa(sportList[i]))
+				exports[natPort] = struct{}{}
+
+				portList := make([]nat.PortBinding, 0, 1)
+				portList = append(portList, nat.PortBinding{HostIP: hostIp, HostPort: strconv.Itoa(dportList[i])})
+				netPort[natPort] = portList
+			}
 		}
 	}
 

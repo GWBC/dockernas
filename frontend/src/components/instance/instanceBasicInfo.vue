@@ -48,7 +48,7 @@
       >
         <div class="table_first_input">{{ param.prompt }}</div>
         <div v-if="param.protocol == 'http'">
-          <a target="_blank" :href="getInstanceWebUrl2(instance, instanceParam, param)">{{ getInstancePortText(instanceParam, param) }}</a>
+          <a target="_blank" :href="getInstanceWebUrl(instance, instanceParam, param)">{{ getInstancePortText(instanceParam, param) }}</a>
         </div>
         <div v-if="param.protocol != 'http'">{{ getInstancePortText(instanceParam, param) }}</div>
       </div>
@@ -143,7 +143,7 @@
 </template>
 
 <script>
-import {getInstancePortText, getInstanceWebUrl, getInstanceWebUrl2} from "../../utils/url";
+import {getInstancePortText, getInstanceWebUrl} from "../../utils/url";
 import createInstance from "../createInstance.vue";
 import {
   stopInstance,
@@ -170,7 +170,6 @@ export default {
   },
   methods: {
     getInstanceWebUrl,
-    getInstanceWebUrl2,
     getInstancePortText,
     initData(instance) {
       this.instance = instance;

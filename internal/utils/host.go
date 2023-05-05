@@ -69,13 +69,16 @@ func IsPortUsed(host string, protocol string, port string) bool {
 	if protocol != "tcp" && protocol != "http" {
 		return false //only check tcp port
 	}
+
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), time.Millisecond*200)
 	if conn != nil {
 		conn.Close()
 	}
+
 	if err == nil {
 		return true
 	}
+
 	return false
 }
 

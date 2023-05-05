@@ -1,30 +1,22 @@
 import storage from "@/utils/storage"
 
-export const getInstanceWebUrl = (instanceParam, portParamItem) => {
-    if (instanceParam.networkMode === "host") {
-        return "http://" + window.location.hostname + ":" + portParamItem.key;
-    }
-    if (portParamItem.value === "" || instanceParam.networkMode === "nobund") {
-        return null;
-    }
-    // return window.location.protocol + "//"+window.location.hostname+":"+port
-    return "http://" + window.location.hostname + ":" + portParamItem.value
-}
+export const getInstanceWebUrl = (instance, instanceParam, portParamItem) => {
+    let hostname = window.location.hostname;
 
-export const getInstanceWebUrl2 = (instance, instanceParam, portParamItem) => {
-    let hostname = instance.dockerSvrIP;
-    if (hostname.lenght == 0)
-    {
-        hostname = window.location.hostname;
+    if (instance){
+        if (instance.dockerSvrIP && instance.dockerSvrIP.lenght != 0) {
+            hostname =instance.dockerSvrIP;
+        }
     }
-
+   
     if (instanceParam.networkMode === "host") {
         return "http://" + hostname + ":" + portParamItem.key;
     }
+
     if (portParamItem.value === "" || instanceParam.networkMode === "nobund") {
         return null;
     }
-    // return window.location.protocol + "//"+hostname+":"+port
+
     return "http://" + hostname+ ":" + portParamItem.value
 }
 
@@ -34,17 +26,17 @@ export const getInstancePortText = (instanceParam, portParamItem) => {
     }
 
     if (portParamItem.value === "" || instanceParam.networkMode === "nobund") {
-        return portParamItem.key + " -> ";
+        return " -> " + portParamItem.key;
     }
 
-    return portParamItem.key + " -> " + portParamItem.value;
+    return portParamItem.value + " -> " + portParamItem.key;
 }
 
 export const splitRouterPathByIndex = (router, index) => {
     return router.split("/").slice(0, index).join("/")
 }
 
-export const getFirstHttpPortUrl = (instanceParam) => {
+export const getFirstHttpPortUrl = (instance, instanceParam) => {
     if (instanceParam.networkMode === "nobund") {
         return null
     }
@@ -53,7 +45,7 @@ export const getFirstHttpPortUrl = (instanceParam) => {
             if (instanceParam.networkMode !== "host" && instanceParam.value === "") {
                 continue
             }
-            return getInstanceWebUrl(instanceParam, param)
+            return getInstanceWebUrl(instance, instanceParam, param)
         }
     }
     return null;

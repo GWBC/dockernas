@@ -54,7 +54,7 @@ export default {
     if(this.instance.url!=""){
       this.url=this.instance.url;
     }else{
-      this.url=getFirstHttpPortUrl(JSON.parse(this.instance.instanceParamStr));
+      this.url=getFirstHttpPortUrl(this.instance, JSON.parse(this.instance.instanceParamStr));
     }
   }
 };

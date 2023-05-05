@@ -1,8 +1,10 @@
 package models
 
 import (
+	"dockernas/internal/config"
 	"errors"
 	"log"
+	"net/url"
 
 	"gorm.io/gorm"
 )
@@ -30,7 +32,22 @@ type Instance struct {
 	InstanceParamStr string `json:"instanceParamStr" gorm:"type:varchar(1024)"` //store json str
 	CreateTime       int64  `json:"createTime"`
 	ImagePullState   string `json:"imagePullState"`
-	DockerSvrIP      string `json:"dockerSvrIP"`
+	DockerSvrIP      string `json:"dockerSvrIP" gorm:"-"`
+}
+
+func GetDockerSvrIP() string {
+	ip := config.GetConfig("dockerSvrIP", "")
+	if len(ip) != 0 {
+		ip = "tcp://" + ip
+		urlObj, e := url.Parse(ip)
+		if e != nil {
+			ip = ""
+		} else {
+			ip = urlObj.Hostname()
+		}
+	}
+
+	return ip
 }
 
 func AddInstance(instance *Instance) {
@@ -65,6 +82,10 @@ func GetInstance() []Instance {
 		panic(err)
 	}
 
+	for i := 0; i < len(instances); i++ {
+		instances[i].DockerSvrIP = GetDockerSvrIP()
+	}
+
 	return instances
 }
 
@@ -79,6 +100,8 @@ func GetInstanceByName(name string) *Instance {
 		panic(err)
 	}
 
+	instance.DockerSvrIP = GetDockerSvrIP()
+
 	return &instance
 }
 
@@ -92,6 +115,8 @@ func GetInstanceByID(id string) *Instance {
 		log.Println(err)
 		panic(err)
 	}
+
+	instance.DockerSvrIP = GetDockerSvrIP()
 
 	return &instance
 }

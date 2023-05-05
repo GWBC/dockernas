@@ -6,6 +6,7 @@ import (
 	"dockernas/internal/utils"
 	"log"
 	"strconv"
+	"strings"
 )
 
 func DelInstancePorts(instance models.Instance) {
@@ -20,10 +21,12 @@ func CheckIsPortUsed(param models.InstanceParam) {
 		if item.Value == "" {
 			continue
 		}
+
 		port, err := models.GetInstancePort(item.Protocol, item.Value)
 		if err != nil {
 			panic(err)
 		}
+
 		if port != nil {
 			if port.InstanceName == param.Name {
 				continue
@@ -31,23 +34,49 @@ func CheckIsPortUsed(param models.InstanceParam) {
 				panic("port " + port.Port + " with " + port.Protocol + " protocol is used by " + port.InstanceName)
 			}
 		}
-		portValue, err := strconv.Atoi(item.Value)
+
+		portRange := strings.Split(item.Value, "-")
+		if len(portRange) == 0 || len(portRange) > 2 {
+			panic("port or start - end")
+		}
+
+		startPort, err := strconv.Atoi(portRange[0])
 		if err != nil {
-			panic(item.Value + " is not a valide port value")
+			panic(portRange[0] + " is not a valide port value")
 		}
-		if portValue >= 65535 {
-			panic(item.Value + " is greater than max port value 65535")
+
+		if startPort >= 65535 {
+			panic(portRange[0] + " is greater than max port value 65535")
 		}
-		if utils.IsPortUsed(getCheckHost(), item.Protocol, item.Value) {
-			panic("port " + item.Value + " with " + item.Protocol + " protocol is used")
+
+		endPort := startPort
+		if len(portRange) == 2 {
+			endPort, err = strconv.Atoi(portRange[1])
+			if err != nil {
+				panic(portRange[1] + " is not a valide port value")
+			}
+
+			if endPort >= 65535 {
+				panic(portRange[1] + " is greater than max port value 65535")
+			}
+		}
+
+		for port := startPort; port <= endPort; port++ {
+			if utils.IsPortUsed(getCheckHost(), item.Protocol, strconv.Itoa(port)) {
+				panic("port " + strconv.Itoa(port) + " with " + item.Protocol + " protocol is used")
+			}
 		}
 	}
 }
 
 func getCheckHost() string {
-	host := "localhost"
-	if config.IsRunInConainer() {
-		host = "host.docker.internal"
+	host := models.GetDockerSvrIP()
+	if len(host) == 0 {
+		host = "localhost"
+
+		if config.IsRunInConainer() {
+			host = "host.docker.internal"
+		}
 	}
 
 	return host

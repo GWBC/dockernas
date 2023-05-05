@@ -37,9 +37,9 @@ export default {
   methods: {
     flushInstances() {
       getAllInstance()
-        .then((response) => {
-          console.log(response);
+        .then((response) => {        
           this.instances = response["data"]["list"];
+          console.log(this.instances);
         })
         .catch((error) => {
           console.log(error);

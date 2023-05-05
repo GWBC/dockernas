@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
-	"net/url"
+	"math"
 	"os"
 	"regexp"
 	"runtime/debug"
@@ -20,7 +20,7 @@ import (
 
 func CheckParamIsValid(param models.InstanceParam) {
 	match, _ := regexp.MatchString("[a-zA-Z0-9][a-zA-Z0-9_.-]", param.Name)
-	if match == false {
+	if !match {
 		panic(param.Name + " not match [a-zA-Z0-9][a-zA-Z0-9_.-] to be a container name")
 	}
 
@@ -30,17 +30,17 @@ func CheckParamIsValid(param models.InstanceParam) {
 			if err != nil {
 				panic("regexp check faild with " + item.Reg + " " + item.Value + ": " + err.Error())
 			}
-			if match == false {
+			if !match {
 				panic(item.Value + " is not match " + item.Reg + " on param " + item.Prompt)
 			}
 		}
 	}
 
-	if param.NetworkMode == models.HOST_MODE {
-		if docker.DetectRealSystem() != "linux" {
-			panic("host network is only work on linux now")
-		}
-	}
+	// if param.NetworkMode == models.HOST_MODE {
+	// 	if docker.DetectRealSystem() != "linux" {
+	// 		panic("host network is only work on linux now")
+	// 	}
+	// }
 
 	CheckIsPortUsed(param)
 }
@@ -84,24 +84,70 @@ func AutoAddInstance() {
 			//////////////////////////////////////////////////////////////
 			instanceParam := models.InstanceParam{}
 			instanceParam.Name = instance.Name
-			instanceParam.NetworkMode = container.HostConfig.NetworkMode
 			instanceParam.AppName = instance.AppName
 			instanceParam.Summary = instance.Summary
 			instanceParam.DockerTemplate = *template
 
+			startPort := 0
+			endPort := 0
+
+			instanceParam.NetworkMode = models.PLACEHOLDER_PARAM
+
 			for _, port := range container.Ports {
 				for i, t := range instanceParam.DockerTemplate.PortParams {
-					if t.Key == strconv.Itoa(int(port.PrivatePort)) {
-						if t.Protocol == "http" {
-							t.Protocol = "tcp"
-						}
+					if t.Protocol == "http" || t.Protocol == "ftp" {
+						t.Protocol = "tcp"
+					}
 
+					if instanceParam.NetworkMode == models.PLACEHOLDER_PARAM {
+						if port.PublicPort == 0 {
+							instanceParam.NetworkMode = models.NOBUND_MODE
+						} else if port.IP == "127.0.0.1" {
+							instanceParam.NetworkMode = models.LOCAL_MODE
+						} else if port.IP == "0.0.0.0" {
+							instanceParam.NetworkMode = models.BIRDGE_MODE
+						}
+					}
+
+					portRange := strings.Split(t.Key, "-")
+					if len(portRange) == 2 {
+						//范围端口
 						if port.Type == t.Protocol {
-							instanceParam.DockerTemplate.PortParams[i].Value = strconv.Itoa(int(port.PublicPort))
-							break
+							start, _ := strconv.Atoi(portRange[0])
+							end, _ := strconv.Atoi(portRange[1])
+							if port.PrivatePort >= uint16(start) && port.PrivatePort <= uint16(end) {
+								if port.PrivatePort == uint16(start) {
+									startPort = int(port.PublicPort)
+								} else if port.PrivatePort == uint16(end) {
+									endPort = int(port.PublicPort)
+								} else {
+									endPort = int(math.Max(float64(endPort), float64(port.PublicPort)))
+								}
+
+								if startPort != 0 && endPort != 0 {
+									instanceParam.DockerTemplate.PortParams[i].Value = strconv.Itoa(startPort) + "-" + strconv.Itoa(endPort)
+								}
+
+								break
+							}
+						}
+					} else {
+						//单一端口
+						if port.Type == t.Protocol {
+							if t.Key == strconv.Itoa(int(port.PrivatePort)) {
+								if port.PublicPort != 0 {
+									instanceParam.DockerTemplate.PortParams[i].Value = strconv.Itoa(int(port.PublicPort))
+								}
+
+								break
+							}
 						}
 					}
 				}
+			}
+
+			if instanceParam.NetworkMode == models.PLACEHOLDER_PARAM {
+				instanceParam.NetworkMode = container.HostConfig.NetworkMode
 			}
 
 			for _, mount := range container.Mounts {
@@ -148,6 +194,7 @@ func GetInstance() []models.Instance {
 			}
 		}
 	}
+
 	return instances
 }
 
@@ -238,9 +285,11 @@ func pullAndRunContainer(instance *models.Instance, param models.InstanceParam, 
 
 func GetInstanceByName(name string) models.Instance {
 	instance := models.GetInstanceByName(name)
+
 	if instance == nil {
 		panic("instance " + name + " not exists")
 	}
+
 	if instance.State == models.PULL_IMAGE {
 		var param models.InstanceParam
 		if utils.GetObjFromJson(instance.InstanceParamStr, &param) != nil {
@@ -248,16 +297,6 @@ func GetInstanceByName(name string) models.Instance {
 		}
 	}
 
-	instance.DockerSvrIP = config.GetConfig("dockerSvrIP", "")
-	if len(instance.DockerSvrIP) != 0 {
-		instance.DockerSvrIP = "tcp://" + instance.DockerSvrIP
-		urlObj, e := url.Parse(instance.DockerSvrIP)
-		if e != nil {
-			instance.DockerSvrIP = ""
-		} else {
-			instance.DockerSvrIP = urlObj.Hostname()
-		}
-	}
 	return *instance
 }
 
