@@ -1,5 +1,5 @@
 {
-    "imageUrl":"linuxserver/jellyfin:latest",
+    "imageUrl":"nyanmisaka/jellyfin:latest",
     "portParams":[
         {
             "prompt":"web访问端口",

@@ -1,0 +1,31 @@
+{
+    "imageUrl":"allanpk716/chinesesubfinder:latest-lite",
+    "privileged":false,
+    "portParams":[
+        {
+            "prompt":"web访问端口",
+            "key":"19035",
+            "value":"19035",
+            "protocol":"http"
+        }
+    ],
+    "envParams":[
+    ],
+    "localVolume":[
+        {
+            "prompt":"配置文件位置",
+            "key":"/config",
+            "value":"",
+            "name":"config"
+        }
+    ],
+    "dfsVolume":[
+        {
+            "prompt":"媒体文件位置",
+            "key":"/media",
+            "value":"",
+            "name":"media"
+        }
+    ]
+}
+
