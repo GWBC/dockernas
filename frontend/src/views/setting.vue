@@ -26,6 +26,9 @@
             <el-menu-item index="/index/setting/image"
               ><div class="menu-item">镜像</div></el-menu-item
             >
+            <el-menu-item index="/index/setting/dockersvrip"
+              ><div class="menu-item">地址</div></el-menu-item
+            >
           </el-menu>
         </div>
       </el-aside>

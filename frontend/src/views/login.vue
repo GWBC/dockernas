@@ -45,7 +45,7 @@ export default {
           storage.set("token",response.data.token);
           storage.set("user",this.user);
           this.btnLoading = false;
-          this.$router.push("/index/store");
+          this.$router.push("/index/instances");
         })
         .catch((error) => {
           this.btnLoading = false;
@@ -54,7 +54,7 @@ export default {
   },
   mounted(){
     if(storage.get("token","")!=""){
-      this.$router.push("/index/store");
+      this.$router.push("/index/instances");
     }
   }
 };

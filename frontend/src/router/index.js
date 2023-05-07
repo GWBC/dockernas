@@ -49,6 +49,11 @@ const router = createRouter({
               path: 'image',
               name: 'image',
               component: () => import('../components/setting/image.vue')
+            },
+            {
+              path: 'dockersvrip',
+              name: 'dockersvrip',
+              component: () => import('../components/setting/dockersvrip.vue')
             }
           ]
         },

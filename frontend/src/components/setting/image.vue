@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="card_style" style="min-height: 800px">
+    <div class="card_style">
       <el-table
         :data="image"
         stripe
@@ -16,7 +16,7 @@
         <el-table-column prop="state" label="拉取进度" sortable  min-width="15%" />
         <el-table-column label="操作" width="90px" #default="scope">
           <el-button size="small" type="danger" @click="delImage(scope.row)"
-            >Delete</el-button
+            >删除</el-button
           >
         </el-table-column>
       </el-table>
@@ -32,13 +32,13 @@ export default {
   methods:{
     flush(){
         getImages().then((response) => {
-            console.log(response);
-            this.image=response.data.list;
-        });
+            console.log(response)
+            this.image=response.data.list
+        })
     },
     delImage(row){
         delImages(row).then((response) => {
-            this.flush();
+            this.flush()
         })
     }
   },

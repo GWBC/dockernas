@@ -1,5 +1,5 @@
 <template>
-  <div ref="terminal" style="height: 100%"></div>
+  <div ref="terminal" style="height: 100%; width: 100%;"></div>
 </template>
 
 <script>
@@ -32,7 +32,7 @@ export default {
       term.open(this.$refs.terminal);
       fitAddon.fit();
 
-      var ws = getWebTerminalWebsocket(this.name, term.cols);
+      var ws = getWebTerminalWebsocket(this.name, term.rows, term.cols);
       var attachAddon = new AttachAddon(ws);
       term.loadAddon(attachAddon);
       term.focus();

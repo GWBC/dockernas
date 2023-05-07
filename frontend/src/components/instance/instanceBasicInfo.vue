@@ -112,6 +112,12 @@
         >停止</el-button
       >
       <el-button
+        type="warning"
+        style="height: 40px; width: 200px;"
+        @click="restart"
+        >重启</el-button
+      >
+      <el-button
         type="danger"
         style="height: 40px; width: 200px"
         @click="showDelete"
@@ -149,6 +155,7 @@ import {
   stopInstance,
   startInstance,
   deleteInstance,
+  restartInstance,
   getInstance,
 } from "../../api/instance";
 
@@ -186,6 +193,11 @@ export default {
     },
     start() {
       startInstance(this.instance.name).then((response) => {
+        location.reload();
+      });
+    },
+    restart(){
+      restartInstance(this.instance.name).then((response) => {
         location.reload();
       });
     },

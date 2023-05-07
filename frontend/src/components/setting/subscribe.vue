@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="card_style" style="min-height: 800px">
+    <div class="card_style">
       <div class="center_div" style="padding-top: 10px; padding-bottom: 10px">
         <div style="flex-grow: 1"></div>
         <el-button
@@ -33,7 +33,7 @@
             size="small"
             type="danger"
             @click="delSubscribe(scope.row)"
-            >Delete</el-button
+            >删除</el-button
           >
         </el-table-column>
       </el-table>

@@ -21,6 +21,10 @@ export const startInstance = (name) => {
     return http.patch("/api/instance/" + name, { "op": "start" })
 }
 
+export const restartInstance = (name) => {
+    return http.patch("/api/instance/" + name, { "op": "restart" })
+}
+
 export const editInstance = (name, dataStr) => {
     return http.patch("/api/instance/" + name, { "op": "edit", "data": dataStr })
 }
@@ -49,8 +53,8 @@ export const getInstanceHttpPort = () => {
     return http.get("/api/instancehttpport")
 }
 
-export const getWebTerminalWebsocket = (instanceName, columns) => {
-    var url=window.location.host+"/terminal?instanceName=" + instanceName + "&columns=" + columns + "&token=" + storage.get("token")
+export const getWebTerminalWebsocket = (instanceName, rows, columns) => {
+    var url=window.location.host+"/terminal?instanceName=" + instanceName + "&rows=" + rows + "&columns=" + columns + "&token=" + storage.get("token")
     if(window.location.protocol=='http:'){
         url="ws://"+url
     }else{
