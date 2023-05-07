@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
 
 jobs:
   build:
@@ -39,4 +37,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
       - name: Build and push
-        run: docker buildx build --platform linux/arm64,linux/amd64 -t xiongzhanzhang/dockernas:latest . --push
+        run: docker buildx build --platform linux/arm64,linux/amd64 -t gwbc/dockernas:latest . --push
