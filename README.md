@@ -33,7 +33,7 @@ docker buildx build --platform linux/arm64,linux/amd64 -t gwbc/dockernas:latest 
 vi /lib/systemd/system/docker.service
 
 #[Service] -> ExecStart 添加
--H tcp://0.0.0.0:2375
+-H tcp://0.0.0.0:12345
 
 systemctl daemon-reload 
 systemctl restart docker
@@ -44,7 +44,6 @@ systemctl restart docker
 {
     "basePath": "/home/data",               #docker启动应用的根路径
     "bindAddr": "0.0.0.0:8080",             #web监听端口
-    "dockerSvrIP": "172.16.100.226:2345",   #docker远程服务IP
     "passwd": "zhang",                      #web密码
     "user": "admin"                         #web用户名
 }
