@@ -21,16 +21,15 @@ import (
 )
 
 func ConnDocker() (*client.Client, error) {
-	ip := config.GetConfig("dockerSvrIP", "")
-	if len(ip) == 0 {
+	info := models.GetUseSvrInfo()
+	if info == nil || len(info.IP) == 0 {
 		return client.NewClientWithOpts(client.FromEnv,
 			client.WithAPIVersionNegotiation())
 	}
 
-	ip = "tcp://" + ip
 	return client.NewClientWithOpts(client.FromEnv,
 		client.WithAPIVersionNegotiation(),
-		client.WithHost(ip))
+		client.WithHost("tcp://"+info.IP))
 }
 
 func Delete(containerID string) error {
@@ -94,7 +93,7 @@ func Restart(containerID string) error {
 		return err
 	}
 
-	timeoutSecond := time.Second * 180
+	timeoutSecond := time.Second * 10
 	err = cli.ContainerRestart(ctx, containerID, &timeoutSecond)
 	if err != nil {
 		log.Println("restart docker error")
@@ -486,7 +485,7 @@ func DetectRealSystem() string {
 	return utils.GetOperationSystemName()
 }
 
-func Exec(container string, columns string) types.HijackedResponse {
+func Exec(container string, rows string, columns string) types.HijackedResponse {
 	ctx := context.Background()
 	cli, err := ConnDocker()
 	if err != nil {
@@ -494,14 +493,26 @@ func Exec(container string, columns string) types.HijackedResponse {
 		panic(err)
 	}
 
-	ir, err := cli.ContainerExecCreate(ctx, container, types.ExecConfig{
-		AttachStdin:  true,
-		AttachStdout: true,
-		AttachStderr: true,
-		Cmd:          []string{"sh"},
-		Env:          []string{"COLUMNS=" + columns, "TERM=xterm-256color"},
-		Tty:          true,
-	})
+	cmds := []string{"bash", "sh"}
+
+	err = nil
+	var ir types.IDResponse
+
+	for _, cmd := range cmds {
+		ir, err = cli.ContainerExecCreate(ctx, container, types.ExecConfig{
+			AttachStdin:  true,
+			AttachStdout: true,
+			AttachStderr: true,
+			Cmd:          []string{cmd},
+			Env:          []string{"LINES=" + rows, "COLUMNS=" + columns, "TERM=xterm"},
+			Tty:          true,
+		})
+
+		if err == nil {
+			break
+		}
+	}
+
 	if err != nil {
 		log.Println("exec cmd error")
 		panic(err)
@@ -513,5 +524,6 @@ func Exec(container string, columns string) types.HijackedResponse {
 		log.Println("attch container error")
 		panic(err)
 	}
+
 	return hr
 }

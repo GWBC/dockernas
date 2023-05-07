@@ -29,7 +29,6 @@ func InitConfig() {
 		SetConfig("passwd", "zhang")
 		SetConfig("bindAddr", "0.0.0.0:8080")
 		SetConfig("basePath", "/home/dockernas/data")
-		SetConfig("dockerSvrIP", "")
 		SaveConfig()
 	}
 }

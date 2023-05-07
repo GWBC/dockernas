@@ -11,8 +11,8 @@ import (
 	"strings"
 )
 
-var appMap = map[string]*models.App{}
-var appMap2 = map[string]*models.App{}
+var appMap map[string]*models.App
+var appMap2 map[string]*models.App
 
 func GetApps() []models.App {
 	apps := []models.App{}
@@ -82,6 +82,10 @@ func GetApps() []models.App {
 }
 
 func GetAppByName(name string, flush bool) *models.App {
+	if appMap == nil {
+		GetApps()
+	}
+
 	app, ok := appMap[name]
 	if ok {
 		return GetAppByNameAndPath(app.Name, config.GetAbsolutePath(app.Path)) //get lastest data on disk
@@ -95,6 +99,10 @@ func GetAppByName(name string, flush bool) *models.App {
 }
 
 func GetAppByImage(image string) (*models.App, *models.DockerTemplate) {
+	if appMap2 == nil {
+		GetApps()
+	}
+
 	app, ok := appMap2[image]
 	if ok {
 		app = GetAppByNameAndPath(app.Name, config.GetAbsolutePath(app.Path)) //get lastest data on disk

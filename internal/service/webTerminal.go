@@ -9,13 +9,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func ProcessWebsocketConn(conn *websocket.Conn, instanceName string, columns string) {
+func ProcessWebsocketConn(conn *websocket.Conn, instanceName string, rows string, columns string) {
 	instance := models.GetInstanceByName(instanceName)
 	if instance == nil {
 		panic("no instance with name " + instanceName)
 	}
 
-	hr := docker.Exec(instance.ContainerID, columns)
+	hr := docker.Exec(instance.ContainerID, "100", columns)
 	defer hr.Close()
 
 	// 退出进程

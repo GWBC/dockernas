@@ -60,6 +60,7 @@ func GetDb() *gorm.DB {
 	_db.AutoMigrate(&ContainerStat{})
 	_db.AutoMigrate(&HttpProxyConfig{})
 	_db.AutoMigrate(&Subscribe{})
+	_db.AutoMigrate(&DockerSvrInfo{})
 
 	db = _db
 

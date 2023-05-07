@@ -75,5 +75,10 @@ func registerRoutes(router *gin.Engine) {
 		apiv1.DELETE("subscribe/:name", api.DelSubscribe)
 
 		apiv1.POST("login", api.Login)
+
+		apiv1.GET("getdockersvrinfos", api.GetDockerSvrInfos)
+		apiv1.POST("adddockersvrinfo", api.AddDockerSvrInfo)
+		apiv1.POST("updatedockersvrinfo", api.UpdateDockerSvrInfo)
+		apiv1.POST("deletedockersvrinfo", api.DeleteDockerSvrInfo)
 	}
 }

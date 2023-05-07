@@ -48,11 +48,11 @@ func PatchInstance(c *gin.Context) {
 	op, _ := patchMap["op"]
 	if op == "stop" {
 		service.StopInstance(*instance)
-	}
-	if op == "start" {
+	} else if op == "start" {
 		service.StartInstance(*instance)
-	}
-	if op == "edit" {
+	} else if op == "restart" {
+		service.RestartInstance(*instance)
+	} else if op == "edit" {
 		data, _ := patchMap["data"]
 		var param models.InstanceParam
 		err := json.Unmarshal([]byte(data), &param)
