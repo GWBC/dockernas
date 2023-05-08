@@ -281,7 +281,7 @@ func GetInstanceByName(name string) models.Instance {
 	instance := models.GetInstanceByName(name)
 
 	if instance == nil {
-		panic("instance " + name + " not exists")
+		panic("instance <" + name + "> not exist")
 	}
 
 	if instance.State == models.PULL_IMAGE {
@@ -295,6 +295,12 @@ func GetInstanceByName(name string) models.Instance {
 }
 
 func CreateInstance(param models.InstanceParam, blocking bool) *models.Instance {
+	tInstance := models.GetInstanceByName(param.Name)
+
+	if tInstance != nil {
+		panic("instance <" + param.Name + "> exist")
+	}
+
 	var instance models.Instance
 	instance.Name = param.Name
 	instance.Summary = param.Summary

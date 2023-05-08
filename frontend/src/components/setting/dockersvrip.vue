@@ -126,10 +126,10 @@ export default {
         }
 
         if (info.name == this.svrinfos[index].name) {
-          this.$message.error('名称重复');
+          this.$message.error('name <' + info.name + '> exist');
           return false
         } else if (info.ip == this.svrinfos[index].ip) {
-          this.$message.error('地址重复');
+          this.$message.error('address <' + info.ip + '> exist');
           return false
         }
       }

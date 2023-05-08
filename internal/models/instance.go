@@ -91,7 +91,7 @@ func GetInstance() []Instance {
 
 func GetInstanceByName(name string) *Instance {
 	var instance Instance
-	err := GetDb().First(&instance, "docker_svr_id=? and name=?", GetDockerSvrIP(), name).Error
+	err := GetDb().First(&instance, "docker_svr_id=? and name=?", GetUseSvrId(), name).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil
