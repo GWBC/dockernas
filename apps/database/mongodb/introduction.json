@@ -4,5 +4,5 @@
     "数据库",
     "编程开发"
   ],
-  "summary": "MongoDB document databases provide high availability and easy scalability."
+  "summary": "MongoDB是一个文档数据库,提供高可用性和易于扩展性.它是一个跨平台的面向文档的数据库系统,被归类为NoSQL数据库"
 }

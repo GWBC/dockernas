@@ -1,5 +1,5 @@
 {
-    "imageUrl":"filebrowser/filebrowser:latest",
+    "imageUrl":"filebrowser/filebrowser",
     "portParams":[
         {
             "prompt":"web访问端口",

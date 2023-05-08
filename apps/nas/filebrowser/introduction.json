@@ -4,5 +4,5 @@
     "文件",
     "NAS"
   ],
-  "summary": "filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files. It allows the creation of multiple users and each user can have its own directory. It can be used as a standalone app."
+  "summary": "FileBrowser在指定目录中提供了一个文件管理界面，可用于上传，删除，预览，重命名和编辑文件 https://github.com/filebrowser/filebrowser"
 }

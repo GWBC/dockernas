@@ -4,5 +4,5 @@
     "数据库",
     "编程开发"
   ],
-  "summary": "Kibana gives shape to any kind of data — structured and unstructured — indexed in Elasticsearch."
+  "summary": "Kibana是一个开源的分析与可视化平台，设计出来用于和Elasticsearch一起使用的。您可以用kibana搜索、查看存放在Elasticsearch中的数据"
 }

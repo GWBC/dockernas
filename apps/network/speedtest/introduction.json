@@ -3,5 +3,5 @@
   "category": [
     "网络"
   ],
-  "summary": "This is a very lightweight Speedtest implemented in Javascript, using XMLHttpRequest and Web Workers."
+  "summary": "这是一个用Javascript实现的非常轻量级的速度测试，使用XMLHttpRequest和WebWorkers"
 }

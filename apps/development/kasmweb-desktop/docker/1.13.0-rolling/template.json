@@ -1,0 +1,24 @@
+{
+    "imageUrl":"kasmweb/desktop:1.13.0-rolling",
+    "portParams":[
+        {
+            "prompt":"服务器端口",
+            "key":"6901",
+            "value":"6901",
+            "protocol":"http"
+        }
+    ],
+    "envParams":[
+        {
+            "prompt":"密码",
+            "key":"VNC_PW",
+            "value":"",
+            "passwd":true
+        }
+    ],
+    "localVolume":[
+    ],
+    "dfsVolume":[
+    ]
+}
+

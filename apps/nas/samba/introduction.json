@@ -4,5 +4,5 @@
     "网络",
     "NAS"
   ],
-  "summary": "Samba is the standard Windows interoperability suite of programs for Linux and Unix"
+  "summary": "samba 为局域网内的不同计算机之间提供文件及打印机等资源的共享服务"
 }

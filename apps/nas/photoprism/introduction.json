@@ -3,5 +3,5 @@
   "category": [
     "相册","NAS"
   ],
-  "summary": "PhotoPrism® is an AI-Powered Photos App for the Decentralized Web. It makes use of the latest technologies to tag and find pictures automatically without getting in your way. You can run it at home, on a private server, or in the cloud."
+  "summary": "PhotoPrism是一款AI驱动的应用程序，用于浏览、组织和分享您的照片集，可以在本地搭建Server端，可以很好的替代Google相册，它支持按时间线、地点浏览照片，并且有AI功能自动识别照片类别，为照片打上标签，方便分类浏览"
 }

@@ -1,0 +1,40 @@
+{
+    "imageUrl":"fredblgr/ubuntu-novnc:22.04",
+    "portParams":[
+        {
+            "prompt":"服务器端口",
+            "key":"80",
+            "value":"6080",
+            "protocol":"http"
+        }
+    ],
+    "envParams":[
+        {
+            "prompt":"用户",
+            "key":"USER",
+            "value":"root"
+        },
+        {
+            "prompt":"密码",
+            "key":"HTTP_PASSWORD",
+            "value":"",
+            "passwd":true
+        },
+        {
+            "prompt":"分辨率",
+            "key":"RESOLUTION",
+            "value":"1920x1080"
+        }
+    ],
+    "localVolume":[
+    ],
+    "dfsVolume":[
+        {
+            "prompt":"工作目录",
+            "key":"/workspace",
+            "value":"",
+            "name":"workspace"
+        }
+    ]
+}
+
