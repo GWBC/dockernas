@@ -3,6 +3,7 @@ package server
 import (
 	"dockernas/internal/config"
 	"dockernas/internal/middleware"
+	"dockernas/internal/models"
 	"log"
 	"strings"
 
@@ -10,6 +11,8 @@ import (
 )
 
 func StartServer() {
+	models.AutoInsertLocalhost()
+
 	gin.DisableConsoleColor()
 	gin.DefaultWriter = log.Writer()
 	gin.DefaultErrorWriter = log.Writer()

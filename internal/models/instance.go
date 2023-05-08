@@ -1,7 +1,6 @@
 package models
 
 import (
-	"dockernas/internal/config"
 	"errors"
 	"log"
 	"net/url"
@@ -26,23 +25,23 @@ type Instance struct {
 	IconUrl          string `json:"iconUrl"`
 	Port             int    `json:"port"`
 	Url              string `json:"url"`
-	Name             string `json:"name"  gorm:"unique;not null"`
 	AppName          string `json:"appName"`
 	Version          string `json:"version"`
 	InstanceParamStr string `json:"instanceParamStr" gorm:"type:varchar(1024)"` //store json str
 	CreateTime       int64  `json:"createTime"`
 	ImagePullState   string `json:"imagePullState"`
-	DockerSvrIP      string `json:"dockerSvrIP" gorm:"-"`
+	Name             string `json:"name"  gorm:"not null"`
+	DockerSvrID      int    `json:"dockersvrid" gorm:"not null"`
+
+	DockerSvrIP string `json:"dockerSvrIP" gorm:"-"`
 }
 
 func GetDockerSvrIP() string {
-	ip := config.GetConfig("dockerSvrIP", "")
-	if len(ip) != 0 {
-		ip = "tcp://" + ip
-		urlObj, e := url.Parse(ip)
-		if e != nil {
-			ip = ""
-		} else {
+	ip := ""
+	info := GetUseSvrInfo()
+	if info != nil && len(info.IP) != 0 {
+		urlObj, e := url.Parse("tcp://" + info.IP)
+		if e == nil {
 			ip = urlObj.Hostname()
 		}
 	}
@@ -51,6 +50,7 @@ func GetDockerSvrIP() string {
 }
 
 func AddInstance(instance *Instance) {
+	instance.DockerSvrID = GetUseSvrId()
 	err := GetDb().Create(instance).Error
 	if err != nil {
 		log.Println(err)
@@ -76,7 +76,7 @@ func DeleteInstance(instance *Instance) {
 
 func GetInstance() []Instance {
 	var instances []Instance
-	err := GetDb().Find(&instances).Error
+	err := GetDb().Where("docker_svr_id=?", GetUseSvrId()).Find(&instances).Error
 	if err != nil {
 		log.Println(err)
 		panic(err)
@@ -91,7 +91,7 @@ func GetInstance() []Instance {
 
 func GetInstanceByName(name string) *Instance {
 	var instance Instance
-	err := GetDb().First(&instance, "name=?", name).Error
+	err := GetDb().First(&instance, "docker_svr_id=? and name=?", GetDockerSvrIP(), name).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil
@@ -107,7 +107,7 @@ func GetInstanceByName(name string) *Instance {
 
 func GetInstanceByID(id string) *Instance {
 	var instance Instance
-	err := GetDb().First(&instance, "container_id=?", id).Error
+	err := GetDb().First(&instance, "docker_svr_id=? and container_id=?", GetUseSvrId(), id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil

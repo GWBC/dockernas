@@ -3,21 +3,21 @@ import storage from "@/utils/storage"
 export const getInstanceWebUrl = (instance, instanceParam, portParamItem) => {
     let hostname = window.location.hostname;
 
-    if (instance){
+    if (instance) {
         if (instance.dockerSvrIP && instance.dockerSvrIP.lenght != 0) {
-            hostname =instance.dockerSvrIP;
+            hostname = instance.dockerSvrIP;
         }
     }
-   
+
     if (instanceParam.networkMode === "host") {
-        return "http://" + hostname + ":" + portParamItem.key;
+        return portParamItem.protocol + "://" + hostname + ":" + portParamItem.key;
     }
 
     if (portParamItem.value === "" || instanceParam.networkMode === "nobund") {
         return null;
     }
 
-    return "http://" + hostname+ ":" + portParamItem.value
+    return portParamItem.protocol + "://" + hostname + ":" + portParamItem.value
 }
 
 export const getInstancePortText = (instanceParam, portParamItem) => {
@@ -41,7 +41,7 @@ export const getFirstHttpPortUrl = (instance, instanceParam) => {
         return null
     }
     for (let param of instanceParam.portParams) {
-        if (param.protocol === 'http') {
+        if (param.protocol === 'http' || param.protocol === 'https') {
             if (instanceParam.networkMode !== "host" && instanceParam.value === "") {
                 continue
             }

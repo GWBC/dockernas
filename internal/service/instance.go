@@ -91,7 +91,7 @@ func AutoAddInstance() {
 			startPort := 0
 			endPort := 0
 
-			instanceParam.NetworkMode = models.PLACEHOLDER_PARAM
+			instanceParam.NetworkMode = models.HOST_MODE
 
 			for _, port := range container.Ports {
 				for i, t := range instanceParam.DockerTemplate.PortParams {
@@ -99,14 +99,12 @@ func AutoAddInstance() {
 						t.Protocol = "tcp"
 					}
 
-					if instanceParam.NetworkMode == models.PLACEHOLDER_PARAM {
-						if port.PublicPort == 0 {
-							instanceParam.NetworkMode = models.NOBUND_MODE
-						} else if port.IP == "127.0.0.1" {
-							instanceParam.NetworkMode = models.LOCAL_MODE
-						} else if port.IP == "0.0.0.0" {
-							instanceParam.NetworkMode = models.BIRDGE_MODE
-						}
+					if instanceParam.NetworkMode == models.HOST_MODE && port.PublicPort == 0 {
+						instanceParam.NetworkMode = models.NOBUND_MODE
+					} else if port.IP == "127.0.0.1" {
+						instanceParam.NetworkMode = models.LOCAL_MODE
+					} else if port.IP == "0.0.0.0" {
+						instanceParam.NetworkMode = models.BIRDGE_MODE
 					}
 
 					portRange := strings.Split(t.Key, "-")
@@ -144,10 +142,6 @@ func AutoAddInstance() {
 						}
 					}
 				}
-			}
-
-			if instanceParam.NetworkMode == models.PLACEHOLDER_PARAM {
-				instanceParam.NetworkMode = container.HostConfig.NetworkMode
 			}
 
 			for _, mount := range container.Mounts {
@@ -311,8 +305,8 @@ func CreateInstance(param models.InstanceParam, blocking bool) *models.Instance 
 	instance.Port = getFirstHttpPort(param)
 	instance.InstanceParamStr = utils.GetJsonFromObj(param)
 	instance.CreateTime = time.Now().UnixMilli()
-	models.AddInstance(&instance)
 
+	models.AddInstance(&instance)
 	pullAndRunContainer(&instance, param, blocking)
 
 	return &instance
@@ -349,9 +343,13 @@ func RestartInstance(instance models.Instance) {
 	err := docker.Restart(instance.ContainerID)
 	if err != nil {
 		models.AddEventLog(instance.Id, models.RESTART_EVENT, err.Error())
+		panic(err)
 	} else {
 		models.AddEventLog(instance.Id, models.RESTART_EVENT, "")
 	}
+
+	instance.State = models.RUNNING
+	models.UpdateInstance(&instance)
 }
 
 func StartInstance(instance models.Instance) {

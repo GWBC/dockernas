@@ -5,7 +5,7 @@
             "prompt":"服务器端口",
             "key":"6901",
             "value":"6901",
-            "protocol":"http"
+            "protocol":"https"
         }
     ],
     "envParams":[

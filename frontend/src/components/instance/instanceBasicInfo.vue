@@ -47,10 +47,10 @@
         :key="param.prompt"
       >
         <div class="table_first_input">{{ param.prompt }}</div>
-        <div v-if="param.protocol == 'http'">
+        <div v-if="param.protocol == 'http' || param.protocol == 'https'">
           <a target="_blank" :href="getInstanceWebUrl(instance, instanceParam, param)">{{ getInstancePortText(instanceParam, param) }}</a>
         </div>
-        <div v-if="param.protocol != 'http'">{{ getInstancePortText(instanceParam, param) }}</div>
+        <div v-if="param.protocol != 'http' && param.protocol != 'https' ">{{ getInstancePortText(instanceParam, param) }}</div>
       </div>
 
       <div

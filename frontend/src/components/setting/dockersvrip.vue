@@ -96,14 +96,14 @@ export default {
     },
     createSvrInfo() {
       this.dialogInfo.title = "添加服务信息"
-      this.dialogInfo.id = 0
+      this.dialogInfo.id = undefined
       this.dialogInfo.name = ""
       this.dialogInfo.ip = ""
       this.dialogInfo.use = 1
       this.dialogInfo.visible = true
     },
     replaceSvrInfo() {
-      if (this.dialogInfo.id != 0) {
+      if (this.dialogInfo.id !== undefined) {
         if (this.checkDataValid(this.dialogInfo, this.dialogInfo.id)) {
           editDockerSvrInfo(this.dialogInfo).then((response) => {
             this.flush()
