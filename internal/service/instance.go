@@ -153,11 +153,13 @@ func AutoAddInstance() {
 				for i, volume := range instanceParam.DockerTemplate.DfsVolume {
 					if mount.Destination == volume.Key {
 						src := mount.Source
-						basePath := config.GetFullDfsPath("/")
+						basePath := config.GetFullDfsPath("")
 						index := strings.Index(src, basePath)
 						if index == 0 {
 							src = src[len(basePath):]
-							src += "/"
+							if len(src) == 0 {
+								src = "/"
+							}
 						}
 						instanceParam.DockerTemplate.DfsVolume[i].Value = src
 						break

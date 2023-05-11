@@ -1,11 +1,13 @@
 package service
 
 import (
+	"dockernas/internal/backend/docker"
 	"dockernas/internal/config"
 	"dockernas/internal/models"
 	"dockernas/internal/utils"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"strings"
 
 	"github.com/shirou/gopsutil/disk"
@@ -24,11 +26,7 @@ func getDirInfo(fullPath string, relativePath string) []models.DirInfo {
 		if fi.IsDir() {
 			var dirInfo models.DirInfo
 			dirInfo.Name = fi.Name()
-			if strings.HasSuffix(relativePath, "/") {
-				dirInfo.Label = relativePath + fi.Name()
-			} else {
-				dirInfo.Label = relativePath + "/" + fi.Name()
-			}
+			dirInfo.Label = filepath.ToSlash(filepath.Join(relativePath, dirInfo.Name))
 			dirInfo.Value = dirInfo.Label
 			dirInfoList = append(dirInfoList, dirInfo)
 		}
@@ -37,12 +35,40 @@ func getDirInfo(fullPath string, relativePath string) []models.DirInfo {
 	return dirInfoList
 }
 
+func getRemoteDir(fullPath string, relativePath string) []models.DirInfo {
+	dirInfoList := []models.DirInfo{}
+
+	rootPath := filepath.ToSlash(filepath.Join("/tmp", fullPath))
+
+	strDirs := docker.HostMachineExec([]string{"find",
+		rootPath,
+		"-maxdepth", "1", "-type", "d"})
+	dirs := strings.Split(string(strDirs), "\n")
+
+	for _, dir := range dirs {
+		if len(dir) == 0 || dir == rootPath {
+			continue
+		}
+
+		var dirInfo models.DirInfo
+		dirInfo.Name = filepath.Base(dir)
+		dirInfo.Label = filepath.ToSlash(filepath.Join(relativePath, dirInfo.Name))
+		dirInfo.Value = dirInfo.Label
+		dirInfoList = append(dirInfoList, dirInfo)
+	}
+
+	return dirInfoList
+}
+
 func GetDfsDirInfo(path string) []models.DirInfo {
 	dirs := []models.DirInfo{}
+	basePath := config.GetFullDfsPath(path)
+
 	if models.GetUseSvrId() == 0 {
 		utils.CheckCreateDir(config.GetFullDfsPath(""))
-		basePath := config.GetFullDfsPath(path)
 		dirs = getDirInfo(basePath, path)
+	} else {
+		dirs = getRemoteDir(basePath, path)
 	}
 
 	return dirs

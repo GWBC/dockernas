@@ -136,6 +136,59 @@ func HostMachineMakeDir(path string) error {
 	return err
 }
 
+func HostMachineExec(cmds []string) []byte {
+	containerName := "dockernas-assist"
+	_, err := CreateAssistContainer(containerName)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx := context.Background()
+	cli, err := ConnDocker()
+	if err != nil {
+		log.Println("create docker client error")
+		panic(err)
+	}
+	defer cli.Close()
+
+	//创建执行环境
+	ir, err := cli.ContainerExecCreate(ctx, containerName, types.ExecConfig{
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          cmds,
+	})
+
+	//执行
+	hr, err := cli.ContainerExecAttach(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
+	if err != nil {
+		log.Println("attch container error")
+		panic(err)
+	}
+
+	// 退出进程
+	defer func() {
+		hr.Conn.Write([]byte("exit\r"))
+		hr.Close()
+	}()
+
+	ret := []byte{}
+	buf := make([]byte, 8192)
+
+	for {
+		nr, err := hr.Conn.Read(buf)
+		if err != nil {
+			break
+		}
+
+		if nr > 0 {
+			ret = append(ret, buf[0:nr]...)
+		}
+	}
+
+	return ret
+}
+
 func Delete(containerID string) error {
 	ctx := context.Background()
 	cli, err := ConnDocker()

@@ -16,11 +16,11 @@ func ProcessWebsocketConn(conn *websocket.Conn, instanceName string, rows string
 	}
 
 	hr := docker.Exec(instance.ContainerID, "100", columns)
-	defer hr.Close()
 
 	// 退出进程
 	defer func() {
 		hr.Conn.Write([]byte("exit\r"))
+		defer hr.Close()
 	}()
 
 	log.Println("websocket attach " + instanceName)
@@ -29,6 +29,7 @@ func ProcessWebsocketConn(conn *websocket.Conn, instanceName string, rows string
 	go func() {
 		wsWriterCopy(hr.Conn, conn)
 	}()
+
 	wsReaderCopy(conn, hr.Conn)
 
 	log.Println("websocket disattach " + instanceName)
