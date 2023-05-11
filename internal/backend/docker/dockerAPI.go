@@ -68,7 +68,7 @@ func CreateAssistContainer(containerName string) (string, error) {
 
 	hostConfig := container.HostConfig{
 		PortBindings: make(nat.PortMap),
-		Mounts: []mount.Mount{mount.Mount{
+		Mounts: []mount.Mount{{
 			Type:   mount.TypeBind,
 			Source: "/",
 			Target: "/tmp",
@@ -113,6 +113,10 @@ func HostMachineMakeDir(path string) error {
 	ir, err := cli.ContainerExecCreate(ctx, containerName, types.ExecConfig{
 		Cmd: []string{"mkdir", "-p", dirPath},
 	})
+	if err != nil {
+		log.Println("exec create error")
+		panic(err)
+	}
 
 	//执行
 	err = cli.ContainerExecStart(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
@@ -125,6 +129,10 @@ func HostMachineMakeDir(path string) error {
 	ir, err = cli.ContainerExecCreate(ctx, containerName, types.ExecConfig{
 		Cmd: []string{"chmod", "777", dirPath},
 	})
+	if err != nil {
+		log.Println("exec create error")
+		panic(err)
+	}
 
 	//执行
 	err = cli.ContainerExecStart(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
@@ -158,6 +166,11 @@ func HostMachineExec(cmds []string) []byte {
 		AttachStderr: true,
 		Cmd:          cmds,
 	})
+
+	if err != nil {
+		log.Println("exec create error")
+		panic(err)
+	}
 
 	//执行
 	hr, err := cli.ContainerExecAttach(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
