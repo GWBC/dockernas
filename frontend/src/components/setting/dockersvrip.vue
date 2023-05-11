@@ -10,16 +10,17 @@
         :cell-style="{ padding: '0px' }" :row-key="row => { return row.id }">
         <el-table-column prop="name" label="名称" sortable min-width="30%" />
         <el-table-column prop="ip" label="容器服务地址" sortable min-width="30%" />
-        <el-table-column prop="use" label="是否使用" sortable min-width="30%">
+        <el-table-column prop="use" label="是否使用" sortable min-width="20%">
           <template #default="scope">
-            <span v-show="scope.row.use==0" style="color:rgb(224, 40, 40)">否</span>
-            <span v-show="scope.row.use==1" style="color: rgb(53, 163, 53);">是</span>
-            <!-- <span style="color:red"> {{ toStrUse(scope.row.use) }} </span> -->
+            <span v-show="scope.row.use == 0" style="color:rgb(224, 40, 40)">否</span>
+            <span v-show="scope.row.use == 1" style="color: rgb(53, 163, 53);">是</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180px" #default="scope">
-          <el-button size="small" type="success" @click="editInfo(scope.row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="delInfo(scope.row)">删除</el-button>
+        <el-table-column label="操作" width="200px" #default="scope">
+          <!-- <el-button size="small" type="success" @click="editInfo(scope.row)">编辑</el-button> -->
+          <el-switch style="margin-right: 10px;" :inactive-value="0" :active-value="1" v-model="scope.row.use"
+            @change="editUse(scope.row)" active-color="#13ce66" inactive-color="#ff4949" />
+          <el-button v-show="scope.row.id != 0" size="small" type="danger" @click="delInfo(scope.row)">删除</el-button>
         </el-table-column>
       </el-table>
     </div>
@@ -51,7 +52,7 @@
             </div>
           </div>
           <div class="center_div" style="margin-top: 50px">
-            <el-button type="primary" style="height: 40px; width: 200px" @click="replaceSvrInfo">{{ $t("common.yes")
+            <el-button v-if="this.dialogInfo.id != 0" type="primary" style="height: 40px; width: 200px" @click="replaceSvrInfo">{{ $t("common.yes")
             }}</el-button>
           </div>
         </div>
@@ -71,15 +72,6 @@ export default {
       getDockerSvrInfos().then((response) => {
         this.svrinfos = response.data.list
       });
-    },
-    toStrUse(index) {
-      if (index == 0) {
-        return "否"
-      }
-
-      if (index == 1) {
-        return "是"
-      }
     },
     delInfo(row) {
       delDockerSvrInfo(row.id).then((response) => {
@@ -101,6 +93,12 @@ export default {
       this.dialogInfo.ip = ""
       this.dialogInfo.use = 1
       this.dialogInfo.visible = true
+    },
+    editUse(info) {
+      info.use != info.use
+      editDockerSvrInfo(info).then((response) => {
+        this.flush()
+      })
     },
     replaceSvrInfo() {
       if (this.dialogInfo.id !== undefined) {
