@@ -1,7 +1,6 @@
 package config
 
 import (
-	"dockernas/internal/utils"
 	"log"
 
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -11,8 +10,7 @@ func InitLogger() {
 	if IsBasePathSet() == false {
 		return
 	}
-	logPath := GetBasePath() + "/logs"
-	utils.CheckCreateDir(logPath)
+	logPath := GetLogPath()
 	log.SetOutput(&lumberjack.Logger{
 		Filename:   logPath + "/server.log",
 		MaxSize:    64, // megabytes

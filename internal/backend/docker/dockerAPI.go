@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"math"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -32,6 +33,109 @@ func ConnDocker() (*client.Client, error) {
 		client.WithHost("tcp://"+info.IP))
 }
 
+func CreateAssistContainer(containerName string) (string, error) {
+	exist, containerId := IsContainerNameExist(containerName)
+	if exist {
+		return containerId, nil
+	}
+
+	ctx := context.Background()
+	cli, err := ConnDocker()
+	if err != nil {
+		log.Println("create docker client error")
+		return containerId, err
+	}
+	defer cli.Close()
+
+	imageUrl := "busybox"
+
+	if !IsImageExist(imageUrl) {
+		reader, err := cli.ImagePull(ctx, imageUrl, types.ImagePullOptions{})
+		if err != nil {
+			log.Println("pull image error: " + imageUrl)
+			return containerId, err
+		}
+
+		defer reader.Close()
+	}
+
+	containerConfig := container.Config{
+		Image:        imageUrl,
+		ExposedPorts: make(nat.PortSet),
+		Env:          []string{},
+		Cmd:          []string{"sh", "-c", "while [ 1 ]; do sleep 3600; done"},
+	}
+
+	hostConfig := container.HostConfig{
+		PortBindings: make(nat.PortMap),
+		Mounts: []mount.Mount{mount.Mount{
+			Type:   mount.TypeBind,
+			Source: "/",
+			Target: "/tmp",
+		}},
+		RestartPolicy: container.RestartPolicy{Name: "always"},
+		NetworkMode:   "none",
+		Privileged:    false,
+	}
+
+	resp, err := cli.ContainerCreate(ctx, &containerConfig, &hostConfig, nil, nil, containerName)
+	if err != nil {
+		log.Println("create container error")
+		return containerId, err
+	}
+
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		log.Println("run container error")
+		return resp.ID, err
+	}
+
+	return resp.ID, nil
+}
+
+func HostMachineMakeDir(path string) error {
+	containerName := "dockernas-assist"
+	_, err := CreateAssistContainer(containerName)
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	cli, err := ConnDocker()
+	if err != nil {
+		log.Println("create docker client error")
+		return err
+	}
+	defer cli.Close()
+
+	dirPath := filepath.ToSlash(filepath.Join("/tmp", path))
+
+	//创建执行环境
+	ir, err := cli.ContainerExecCreate(ctx, containerName, types.ExecConfig{
+		Cmd: []string{"mkdir", "-p", dirPath},
+	})
+
+	//执行
+	err = cli.ContainerExecStart(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
+	if err != nil {
+		log.Println("exec command error")
+		panic(err)
+	}
+
+	//创建执行环境
+	ir, err = cli.ContainerExecCreate(ctx, containerName, types.ExecConfig{
+		Cmd: []string{"chmod", "777", dirPath},
+	})
+
+	//执行
+	err = cli.ContainerExecStart(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
+	if err != nil {
+		log.Println("exec command error")
+		panic(err)
+	}
+
+	return err
+}
+
 func Delete(containerID string) error {
 	ctx := context.Background()
 	cli, err := ConnDocker()
@@ -39,6 +143,7 @@ func Delete(containerID string) error {
 		log.Println("create docker client error")
 		return err
 	}
+	defer cli.Close()
 
 	err = cli.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{Force: true})
 	if err != nil {
@@ -56,6 +161,7 @@ func Stop(containerID string) error {
 		log.Println("create docker client error")
 		return err
 	}
+	defer cli.Close()
 
 	timeoutSecond := time.Second * 10
 	err = cli.ContainerStop(ctx, containerID, &timeoutSecond)
@@ -75,6 +181,7 @@ func Start(containerID string) error {
 		log.Println("create docker client error")
 		return err
 	}
+	defer cli.Close()
 
 	err = cli.ContainerStart(ctx, containerID, types.ContainerStartOptions{})
 	if err != nil {
@@ -92,6 +199,7 @@ func Restart(containerID string) error {
 		log.Println("create docker client error")
 		return err
 	}
+	defer cli.Close()
 
 	timeoutSecond := time.Second * 10
 	err = cli.ContainerRestart(ctx, containerID, &timeoutSecond)
@@ -110,6 +218,7 @@ func PullImage(imageUrl string) (io.ReadCloser, error) {
 		log.Println("create docker client error")
 		return nil, err
 	}
+	defer cli.Close()
 
 	reader, err2 := cli.ImagePull(ctx, imageUrl, types.ImagePullOptions{})
 	if err2 != nil {
@@ -127,6 +236,7 @@ func DelImage(imageId string) {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	_, err2 := cli.ImageRemove(ctx, imageId, types.ImageRemoveOptions{})
 	if err2 != nil {
@@ -141,6 +251,7 @@ func ListImage() []models.ImageInfo {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	images, err2 := cli.ImageList(ctx, types.ImageListOptions{All: true})
 	if err2 != nil {
@@ -162,6 +273,15 @@ func ListImage() []models.ImageInfo {
 	return infos
 }
 
+func IsImageExist(name string) bool {
+	for _, img := range ListImage() {
+		if strings.Contains(img.Name, name) {
+			return true
+		}
+	}
+	return false
+}
+
 func ListContainer() []types.Container {
 	ctx := context.Background()
 	cli, err := ConnDocker()
@@ -169,6 +289,7 @@ func ListContainer() []types.Container {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{All: true})
 	if err != nil {
@@ -187,6 +308,17 @@ func IsContainerExist(containerID string) bool {
 	return false
 }
 
+func IsContainerNameExist(name string) (bool, string) {
+	for _, container := range ListContainer() {
+		for _, cname := range container.Names {
+			if cname == "/"+name {
+				return true, container.ID
+			}
+		}
+	}
+	return false, ""
+}
+
 func GetContainerInspect(containerID string) types.ContainerJSON {
 	ctx := context.Background()
 	cli, err := ConnDocker()
@@ -194,6 +326,7 @@ func GetContainerInspect(containerID string) types.ContainerJSON {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	data, err := cli.ContainerInspect(ctx, containerID)
 	if err != nil {
@@ -218,6 +351,7 @@ func Create(param *models.InstanceParam) (string, error) {
 		log.Println("create docker client error")
 		return "", err
 	}
+	defer cli.Close()
 
 	// _, err = cli.ImagePull(ctx, param.ImageUrl, types.ImagePullOptions{})
 	// if err != nil {
@@ -246,6 +380,8 @@ func GetContainerStat(id string) (types.ContainerStats, error) {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
+
 	return cli.ContainerStats(ctx, id, false)
 }
 
@@ -266,6 +402,8 @@ func replaceVariable(aStr string, param *models.InstanceParam) string {
 func buildConfig(param *models.InstanceParam) (container.Config, container.HostConfig) {
 	m := make([]mount.Mount, 0, len(param.DfsVolume)+len(param.LocalVolume))
 
+	useSvrId := models.GetUseSvrId()
+
 	var usedVolumeName []string
 	for index, item := range param.LocalVolume {
 		if item.Name == "" || utils.Contains(usedVolumeName, item.Name) {
@@ -274,7 +412,13 @@ func buildConfig(param *models.InstanceParam) (container.Config, container.HostC
 		usedVolumeName = append(usedVolumeName, item.Name)
 
 		if item.MountFile {
-			config.GetLocalVolumePath(param.Name, "") // create dir if not exit
+			localDir := config.GetLocalVolumePath(param.Name, "")
+			if useSvrId == 0 {
+				utils.CheckCreateDir(localDir)
+			} else {
+				HostMachineMakeDir(localDir)
+			}
+
 			templateFilePath := config.GetAppMountFilePath(param.Path, item.Name)
 			instanceLocalPath := config.GetAppLocalFilePath(param.Name, item.Name)
 			if !utils.IsFileExist(instanceLocalPath) {
@@ -292,7 +436,13 @@ func buildConfig(param *models.InstanceParam) (container.Config, container.HostC
 			})
 		} else {
 			localDir := config.GetLocalVolumePath(param.Name, item.Name)
-			utils.MakePathReadAble(localDir)
+			if useSvrId == 0 {
+				utils.CheckCreateDir(localDir)
+				utils.MakePathReadAble(localDir)
+			} else {
+				HostMachineMakeDir(localDir)
+			}
+
 			param.LocalVolume[index].Value = localDir
 			m = append(m, mount.Mount{
 				Type:   mount.TypeBind,
@@ -310,7 +460,13 @@ func buildConfig(param *models.InstanceParam) (container.Config, container.HostC
 			}
 			usedVolumeName = append(usedVolumeName, item.Name)
 			localDir := config.GetLocalVolumePath(param.Name, item.Name)
-			utils.MakePathReadAble(localDir)
+			if useSvrId == 0 {
+				utils.CheckCreateDir(localDir)
+				utils.MakePathReadAble(localDir)
+			} else {
+				HostMachineMakeDir(localDir)
+			}
+
 			m = append(m, mount.Mount{
 				Type:   mount.TypeBind,
 				Source: GetPathOnHost(localDir),
@@ -321,9 +477,16 @@ func buildConfig(param *models.InstanceParam) (container.Config, container.HostC
 				item.Value = "/" + item.Value
 				param.DfsVolume[index].Value = item.Value
 			}
+
 			dfsPath := config.GetFullDfsPath(item.Value)
-			utils.CheckCreateDir(dfsPath)
-			utils.MakePathReadAble(dfsPath)
+
+			if useSvrId == 0 {
+				utils.CheckCreateDir(dfsPath)
+				utils.MakePathReadAble(dfsPath)
+			} else {
+				HostMachineMakeDir(dfsPath)
+			}
+
 			m = append(m, mount.Mount{
 				Type:   mount.TypeBind,
 				Source: GetPathOnHost(dfsPath),
@@ -445,6 +608,7 @@ func GetLog(containerID string) string {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	out, err := cli.ContainerLogs(ctx, containerID, types.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
@@ -466,6 +630,7 @@ func GetDockerVersion() types.Version {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	version, err := cli.ServerVersion(ctx)
 	if err != nil {
@@ -492,6 +657,7 @@ func Exec(container string, rows string, columns string) types.HijackedResponse 
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	cmds := []string{"bash", "sh"}
 

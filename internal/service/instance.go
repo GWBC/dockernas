@@ -48,7 +48,10 @@ func CheckParamIsValid(param models.InstanceParam) {
 func AutoAddInstance() {
 	containerList := docker.ListContainer()
 	for _, container := range containerList {
-		instance := models.GetInstanceByID(container.ID)
+		name := strings.Split(container.Names[0], "/")
+		containerName := name[len(name)-1]
+
+		instance := models.GetInstanceByName(containerName)
 		if instance == nil {
 			index := strings.Index(container.Image, ":")
 			if index < 0 {
@@ -72,12 +75,7 @@ func AutoAddInstance() {
 			}
 
 			instance.Summary = "自动添加"
-
-			name := strings.Split(container.Names[0], "/")
-			if len(name) == 0 {
-				continue
-			}
-			instance.Name = name[len(name)-1]
+			instance.Name = containerName
 			instance.ContainerID = container.ID
 			instance.CreateTime = container.Created * 1000
 
@@ -154,7 +152,14 @@ func AutoAddInstance() {
 
 				for i, volume := range instanceParam.DockerTemplate.DfsVolume {
 					if mount.Destination == volume.Key {
-						instanceParam.DockerTemplate.DfsVolume[i].Value = mount.Source
+						src := mount.Source
+						basePath := config.GetFullDfsPath("/")
+						index := strings.Index(src, basePath)
+						if index == 0 {
+							src = src[len(basePath):]
+							src += "/"
+						}
+						instanceParam.DockerTemplate.DfsVolume[i].Value = src
 						break
 					}
 				}

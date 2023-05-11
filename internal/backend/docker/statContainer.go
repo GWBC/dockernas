@@ -20,6 +20,7 @@ func GetContainerStatus() []models.ContainerStat {
 		log.Println("create docker client error")
 		panic(err)
 	}
+	defer cli.Close()
 
 	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
 	if err != nil {

@@ -38,9 +38,14 @@ func getDirInfo(fullPath string, relativePath string) []models.DirInfo {
 }
 
 func GetDfsDirInfo(path string) []models.DirInfo {
-	utils.CheckCreateDir(config.GetFullDfsPath(""))
-	basePath := config.GetFullDfsPath(path)
-	return getDirInfo(basePath, path)
+	dirs := []models.DirInfo{}
+	if models.GetUseSvrId() == 0 {
+		utils.CheckCreateDir(config.GetFullDfsPath(""))
+		basePath := config.GetFullDfsPath(path)
+		dirs = getDirInfo(basePath, path)
+	}
+
+	return dirs
 }
 
 func GetSystemDirInfo(path string) []models.DirInfo {

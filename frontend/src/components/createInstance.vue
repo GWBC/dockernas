@@ -1,31 +1,18 @@
 <template>
-  <el-dialog
-    v-model="dialogTableVisible"
-    :title="title"
-    class="big_dialog"
-  >
+  <el-dialog v-model="dialogTableVisible" :title="title" class="big_dialog">
     <div class="center_div">
       <div>
         <div class="input_div">
           <div class="first_input">{{ $t("store.instanceName") }}</div>
           <div>
-            <el-input
-              v-model="instanceParam.name"
-              class="w-50 m-2 big_input"
-              size="large"
-              :disabled="editMode == true"
-            >
+            <el-input v-model="instanceParam.name" class="w-50 m-2 big_input" size="large" :disabled="editMode == true">
             </el-input>
           </div>
         </div>
         <div class="input_div">
           <div class="first_input">{{ $t("store.instanceSummary") }}</div>
           <div>
-            <el-input
-              v-model="instanceParam.summary"
-              class="w-50 m-2 big_input"
-              size="large"
-            >
+            <el-input v-model="instanceParam.summary" class="w-50 m-2 big_input" size="large">
             </el-input>
           </div>
         </div>
@@ -35,16 +22,17 @@
             <span v-if="instanceParam.appUrl != ''">
               <a target="_blank" :href="instanceParam.appUrl">{{
                 instanceParam.appName
-              }}</a></span
-            >
+              }}</a></span>
             <span v-if="instanceParam.appUrl == ''">{{
               instanceParam.appName
             }}</span>
             <el-tooltip effect="dark" placement="bottom">
-              <el-icon><InfoFilled /></el-icon>
-              <template #content
-                ><div style="width: 300px">{{ app.summary }}</div></template
-              >
+              <el-icon>
+                <InfoFilled />
+              </el-icon>
+              <template #content>
+                <div style="width: 300px">{{ app.summary }}</div>
+              </template>
             </el-tooltip>
           </div>
         </div>
@@ -52,18 +40,8 @@
         <div class="input_div">
           <div class="first_input">网络模式</div>
           <div>
-            <el-select
-                v-model="instanceParam.networkMode"
-                collapse-tags
-                size="large"
-                class="big_input"
-            >
-              <el-option
-                  v-for="item in networkModes"
-                  :key="item"
-                  :label="item"
-                  :value="item"
-              />
+            <el-select v-model="instanceParam.networkMode" collapse-tags size="large" class="big_input">
+              <el-option v-for="item in networkModes" :key="item" :label="item" :value="item" />
             </el-select>
           </div>
         </div>
@@ -71,108 +49,48 @@
         <div class="input_div">
           <div class="first_input">{{ $t("store.appVersion") }}</div>
           <div>
-            <el-select
-              v-model="instanceParam.version"
-              collapse-tags
-              size="large"
-              class="big_input"
-              @change="versionChange"
-            >
-              <el-option
-                v-for="item in appVersions"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
+            <el-select v-model="instanceParam.version" collapse-tags size="large" class="big_input"
+              @change="versionChange">
+              <el-option v-for="item in appVersions" :key="item" :label="item" :value="item" />
             </el-select>
           </div>
         </div>
 
-        <div
-          class="input_div"
-          v-for="param in instanceParam.portParams"
-          v-show="param.hide == false && instanceParam.networkMode!='nobund' && instanceParam.networkMode!='host'"
-          :key="param.prompt"
-        >
+        <div class="input_div" v-for="param in instanceParam.portParams"
+          v-show="param.hide == false && instanceParam.networkMode != 'nobund' && instanceParam.networkMode != 'host'"
+          :key="param.prompt">
           <div class="first_input">{{ param.prompt }}</div>
           <div>
-            <el-input
-              v-model="param.value"
-              class="w-50 m-2 big_input"
-              size="large"
-            ></el-input>
+            <el-input v-model="param.value" class="w-50 m-2 big_input" size="large"></el-input>
           </div>
         </div>
-        <div
-          class="input_div"
-          v-for="param in instanceParam.dfsVolume"
-          v-show="param.hide == false"
-          :key="param.prompt"
-        >
+        <div class="input_div" v-for="param in instanceParam.dfsVolume" v-show="param.hide == false"
+          :key="instanceParam.version + param.prompt">
           <div class="first_input">{{ param.prompt }}</div>
-          <!-- <div>
-            <el-input
-              v-model="param.value"
-              class="w-50 m-2"
-              style="width: 400px"
-              size="large"
-            ></el-input>
-          </div> -->
-          <el-tree-select
-            class="w-50 m-2 big_input"
-            size="large"
-            v-model="param.value"
-            check-strictly
-            filterable
-            allow-create
-            lazy
-            :load="loadNode"
-          >
+          <el-tree-select class="w-50 m-2 big_input" size="large" v-model="param.value" check-strictly filterable
+            allow-create lazy :load="loadNode">
             <template #default="{ data: { name } }">{{ name }}</template>
           </el-tree-select>
         </div>
-        <div
-          class="input_div"
-          v-for="param in instanceParam.envParams"
-          v-show="param.hide == false"
-          :key="param.prompt"
-        >
+        <div class="input_div" v-for="param in instanceParam.envParams" v-show="param.hide == false" :key="param.prompt">
           <div class="first_input">{{ param.prompt }}</div>
           <div>
-            <el-input
-              :type="param.passwd == true ? 'password' : 'text'"
-              v-model="param.value"
-              class="w-50 m-2 big_input"
-              size="large"
-              :show-password="param.passwd"
-            ></el-input>
+            <el-input :type="param.passwd == true ? 'password' : 'text'" v-model="param.value" class="w-50 m-2 big_input"
+              size="large" :show-password="param.passwd"></el-input>
           </div>
         </div>
 
-        <div
-          class="input_div"
-          v-for="param in instanceParam.otherParams"
-          v-show="param.hide == false"
-          :key="param.prompt"
-        >
+        <div class="input_div" v-for="param in instanceParam.otherParams" v-show="param.hide == false"
+          :key="param.prompt">
           <div class="first_input">{{ param.prompt }}</div>
           <div>
-            <el-input
-              v-model="param.value"
-              class="w-50 m-2 big_input"
-              size="large"
-            ></el-input>
+            <el-input v-model="param.value" class="w-50 m-2 big_input" size="large"></el-input>
           </div>
         </div>
 
         <div class="center_div" style="margin-top: 50px">
-          <el-button
-            type="primary"
-            :loading="btnLoading"
-            style="height: 40px; width: 200px"
-            @click="createApp"
-            >{{ $t("common.yes") }}</el-button
-          >
+          <el-button type="primary" :loading="btnLoading" style="height: 40px; width: 200px" @click="createApp">{{
+            $t("common.yes") }}</el-button>
         </div>
       </div>
     </div>
@@ -199,7 +117,7 @@ export default {
         appName: "",
         version: "",
         appUrl: "",
-        networkMode:"bridge",
+        networkMode: "bridge",
         portParams: [],
         envParams: [],
         dfsVolume: [],
@@ -207,12 +125,11 @@ export default {
       },
 
       dialogTableVisible: false,
-      selectVersion: "",
       appVersions: [],
       title: this.$t("store.instanceApp"),
 
-      networkModes:[
-          "bridge", "host", "local", "nobund"
+      networkModes: [
+        "bridge", "host", "local", "nobund"
       ]
     };
   },
@@ -267,6 +184,8 @@ export default {
           for (let key in d) {
             this.instanceParam[key] = JSON.parse(JSON.stringify(d[key]));
           }
+
+          break;
         }
       }
     },
@@ -306,5 +225,4 @@ export default {
 @import "../css/common.css";
 @import "../css/dialog.css";
 @import "../css/text.css";
-
 </style>

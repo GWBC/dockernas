@@ -33,17 +33,9 @@ func GetFullDfsPath(path string) string {
 	return filepath.ToSlash(basePath)
 }
 
-func GetDBFilePath() string {
+func GetLocalVolumePath(instanceName string, volumeName string) string {
 	basePath := GetBasePath()
-	basePath = filepath.Join(basePath, "meta")
-	utils.CheckCreateDir(basePath)
-	return filepath.ToSlash(filepath.Join(basePath, "data.db3"))
-}
-
-func GetExtraAppPath() string {
-	basePath := GetBasePath()
-	basePath = filepath.Join(basePath, "apps")
-	utils.CheckCreateDir(basePath)
+	basePath = filepath.Join(basePath, "local", instanceName, volumeName)
 	return filepath.ToSlash(basePath)
 }
 
@@ -55,13 +47,6 @@ func GetAppLocalPath(instanceName string) string {
 
 func GetAppLocalFilePath(instanceName string, fileName string) string {
 	return filepath.ToSlash(filepath.Join(GetAppLocalPath(instanceName), fileName))
-}
-
-func GetLocalVolumePath(instanceName string, volumeName string) string {
-	basePath := GetBasePath()
-	basePath = filepath.Join(basePath, "local", instanceName, volumeName)
-	utils.CheckCreateDir(basePath)
-	return filepath.ToSlash(basePath)
 }
 
 func GetRelativePath(path string) string {
@@ -86,4 +71,25 @@ func GetAbsolutePath(path string) string {
 
 func GetAppMountFilePath(path string, fileName string) string {
 	return filepath.ToSlash(filepath.Join(GetAbsolutePath(path), fileName))
+}
+
+func GetDBFilePath() string {
+	basePath := GetBasePath()
+	basePath = filepath.Join(basePath, "meta")
+	utils.CheckCreateDir(basePath)
+	return filepath.ToSlash(filepath.Join(basePath, "data.db3"))
+}
+
+func GetExtraAppPath() string {
+	basePath := GetBasePath()
+	basePath = filepath.Join(basePath, "apps")
+	utils.CheckCreateDir(basePath)
+	return filepath.ToSlash(basePath)
+}
+
+func GetLogPath() string {
+	basePath := GetBasePath()
+	basePath = filepath.Join(basePath, "logs")
+	utils.CheckCreateDir(basePath)
+	return filepath.ToSlash(basePath)
 }

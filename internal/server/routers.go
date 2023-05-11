@@ -10,16 +10,18 @@ import (
 )
 
 func initStaticFileRouter(router *gin.Engine) {
-	router.StaticFile("/", "./frontend/dist/index.html")
-	router.Static("/assets", "./frontend/dist/assets")
+	rootDir := "./frontend/dist/"
 
-	dir1, err1 := ioutil.ReadDir("./frontend/dist")
+	router.StaticFile("/", rootDir+"index.html")
+	router.Static("/assets", rootDir+"assets")
+
+	dir1, err1 := ioutil.ReadDir(rootDir)
 	if err1 != nil {
 		log.Println("list dir error", err1)
 	} else {
 		for _, fi1 := range dir1 {
 			if !fi1.IsDir() {
-				router.StaticFile("/"+fi1.Name(), "./frontend/dist/"+fi1.Name())
+				router.StaticFile("/"+fi1.Name(), rootDir+fi1.Name())
 			}
 		}
 	}

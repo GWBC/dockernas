@@ -18,6 +18,7 @@ func IsNetworkExist() (bool, error) {
 		log.Println("create docker client error")
 		return false, err
 	}
+	defer cli.Close()
 
 	networks, err := cli.NetworkList(ctx, types.NetworkListOptions{})
 	if err != nil {
@@ -49,6 +50,7 @@ func CheckNetwork() error {
 		log.Println("create docker client error")
 		return err
 	}
+	defer cli.Close()
 
 	_, err = cli.NetworkCreate(ctx, GetDockerNasNetworkName(), types.NetworkCreate{})
 	return err
