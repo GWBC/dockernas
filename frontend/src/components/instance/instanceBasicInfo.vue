@@ -146,7 +146,7 @@ export default {
     },
     autoRefresh() {
       if (this.timer == null) {
-        //this.timer = setInterval(this.refresh, 1000);
+        this.timer = setInterval(this.refresh, 2000);
       }
     },
     stopAutoRefresh() {
