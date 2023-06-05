@@ -35,6 +35,7 @@
               <template #title>帮助</template>
               <el-menu-item @click="gotoLink('https://doc.dockernas.com')" index="">文档</el-menu-item>
               <el-menu-item @click="gotoLink('https://github.com/GWBC/dockernas.git')" index="">github</el-menu-item>
+              <el-menu-item @click="gotoLink('https://hub.docker.com/r/gwbc/dockernas')" index="">docker</el-menu-item>
               <el-menu-item @click="logout" index="">退出</el-menu-item>
             </el-sub-menu>
           </el-menu>
