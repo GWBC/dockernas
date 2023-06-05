@@ -14,7 +14,7 @@ var mutex sync.Mutex
 var pullingImageStateMap map[string]*models.ImageInfo = make(map[string]*models.ImageInfo)
 
 func getImageName(imageUrl string) string {
-	if strings.Contains(imageUrl, ":") == false {
+	if !strings.Contains(imageUrl, ":") {
 		return imageUrl + ":latest"
 	}
 	return imageUrl

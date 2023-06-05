@@ -10,26 +10,10 @@
     ],
     "envParams":[
         {
-            "prompt":"用户名",
-            "key":"MYSQL_USER",
-            "value":""
-        },
-        {
-            "prompt":"用户密码",
-            "key":"MYSQL_PASSWORD",
+            "prompt":"Root用户密码",
+            "key":"MYSQL_ROOT_PASSWORD",
             "value":"",
             "passwd":true
-        },
-        {
-            "prompt":"库名",
-            "key":"MYSQL_DATABASE",
-            "value":""
-        },
-        {
-            "prompt":"随机root密码",
-            "key":"MYSQL_RANDOM_ROOT_PASSWORD",
-            "value":"yes",
-            "hide":true
         }
     ],
     "localVolume":[

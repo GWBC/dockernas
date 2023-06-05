@@ -61,17 +61,14 @@ func getRemoteDir(fullPath string, relativePath string) []models.DirInfo {
 }
 
 func GetDfsDirInfo(path string) []models.DirInfo {
-	dirs := []models.DirInfo{}
 	basePath := config.GetFullDfsPath(path)
 
 	if models.GetUseSvrId() == 0 {
 		utils.CheckCreateDir(config.GetFullDfsPath(""))
-		dirs = getDirInfo(basePath, path)
-	} else {
-		dirs = getRemoteDir(basePath, path)
+		return getDirInfo(basePath, path)
 	}
 
-	return dirs
+	return getRemoteDir(basePath, path)
 }
 
 func GetSystemDirInfo(path string) []models.DirInfo {
@@ -85,7 +82,7 @@ func GetSystemDirInfo(path string) []models.DirInfo {
 			for _, info := range infos {
 				var dirInfo models.DirInfo
 				dirInfo.Name = info.Mountpoint
-				if strings.HasSuffix(info.Mountpoint, "/") == false {
+				if !strings.HasSuffix(info.Mountpoint, "/") {
 					dirInfo.Label = info.Mountpoint + "/"
 					dirInfo.Value = info.Mountpoint + "/"
 				} else {

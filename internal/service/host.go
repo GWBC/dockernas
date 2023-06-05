@@ -42,7 +42,7 @@ func GetHostInfo() models.HostInfo {
 }
 
 func GetStorageInfo() models.StorageInfo {
-	if config.IsBasePathSet() == false {
+	if !config.IsBasePathSet() {
 		panic("base path is not set")
 	}
 

@@ -135,7 +135,7 @@ func GetAppByImage(image string) (*models.App, *models.DockerTemplate) {
 func GetAppByNameAndPath(name string, path string) *models.App {
 	var app models.App
 	app.IconUrl = "/api/icon?path=" + config.GetRelativePath(path) + "/icon.jpg"
-	app.DockerVersions = getDockerTemplates(path + "/docker")
+	app.DockerVersions = getDockerTemplates(name, path+"/docker")
 	if len(app.DockerVersions) == 0 {
 		return nil
 	}
@@ -148,7 +148,7 @@ func GetAppByNameAndPath(name string, path string) *models.App {
 	return &app
 }
 
-func getDockerTemplates(path string) []models.DockerTemplate {
+func getDockerTemplates(name string, path string) []models.DockerTemplate {
 	var dockerTemplates []models.DockerTemplate
 
 	dirs, err := ioutil.ReadDir(path)
@@ -163,13 +163,21 @@ func getDockerTemplates(path string) []models.DockerTemplate {
 			dockerTemplate.Version = fi.Name()
 			if utils.GetObjFromJsonFile(path+"/"+fi.Name()+"/template.json", &dockerTemplate) != nil {
 				if dockerTemplate.OSList != "" &&
-					strings.Contains(dockerTemplate.OSList, docker.DetectRealSystem()) == false {
+					!strings.Contains(dockerTemplate.OSList, docker.DetectRealSystem()) {
 					continue
 				}
 				dockerTemplate.Path = config.GetRelativePath(path) + "/" + fi.Name()
 				dockerTemplates = append(dockerTemplates, dockerTemplate)
 			} else {
 				log.Println("load template error for " + fi.Name() + " under " + path)
+			}
+		}
+	}
+
+	for i, v := range dockerTemplates {
+		for j, dfs := range v.DfsVolume {
+			if len(dfs.Value) == 0 || dfs.Value == "/" {
+				dockerTemplates[i].DfsVolume[j].Value = filepath.ToSlash(filepath.Join("/", name+"_"+v.Version))
 			}
 		}
 	}

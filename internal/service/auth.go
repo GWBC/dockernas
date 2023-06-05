@@ -18,7 +18,7 @@ func IsTokenValid(token string) bool {
 
 func GenToken(user string, passwd string) string {
 	realUserName, realPasswd := config.GetUserInfo()
-	if strings.ToLower(realUserName) != strings.ToLower(user) || realPasswd != passwd {
+	if !strings.EqualFold(realUserName, user) || realPasswd != passwd {
 		panic("user password error")
 	}
 
