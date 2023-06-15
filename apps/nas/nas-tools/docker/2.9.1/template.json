@@ -10,7 +10,9 @@
     ],
     "envParams":[
         {
-            "REPO_URL":"https://ghproxy.com/https://github.com/jxxghp/nas-tools.git"
+            "prompt":"代码地址",
+            "key":"REPO_URL",
+            "value":"https://ghproxy.com/https://github.com/jxxghp/nas-tools.git"
         }
     ],
     "localVolume":[
