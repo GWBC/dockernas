@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -229,8 +228,8 @@ func Stop(containerID string) error {
 	}
 	defer cli.Close()
 
-	timeoutSecond := time.Second * 10
-	err = cli.ContainerStop(ctx, containerID, &timeoutSecond)
+	timeoutSecond := 10
+	err = cli.ContainerStop(ctx, containerID, container.StopOptions{Timeout: &timeoutSecond})
 
 	if err != nil {
 		log.Println("stop docker error")
@@ -267,8 +266,8 @@ func Restart(containerID string) error {
 	}
 	defer cli.Close()
 
-	timeoutSecond := time.Second * 10
-	err = cli.ContainerRestart(ctx, containerID, &timeoutSecond)
+	timeoutSecond := 10
+	err = cli.ContainerRestart(ctx, containerID, container.StopOptions{Timeout: &timeoutSecond})
 	if err != nil {
 		log.Println("restart docker error")
 		return err
