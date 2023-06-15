@@ -1,5 +1,5 @@
 {
-    "imageUrl":"nastools/nas-tools:2.9.1",
+    "imageUrl":"19970688/nastools-bt",
     "portParams":[
         {
             "prompt":"服务器端口",
@@ -9,6 +9,9 @@
         }
     ],
     "envParams":[
+        {
+            "REPO_URL":"https://ghproxy.com/https://github.com/jxxghp/nas-tools.git"
+        }
     ],
     "localVolume":[
         {
