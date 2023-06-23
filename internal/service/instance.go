@@ -10,7 +10,6 @@ import (
 	"io"
 	"log"
 	"math"
-	"os"
 	"regexp"
 	"runtime/debug"
 	"strconv"
@@ -402,10 +401,6 @@ func StopInstance(instance models.Instance) {
 }
 
 func DeleteInstance(instance models.Instance) {
-	// if instance.State == models.RUNNING {
-	// 	StopInstance(instance)
-	// }
-
 	DelInstancePorts(instance)
 	models.DelInstanceStatData(instance.Name)
 	models.DelEvents(instance.Id)
@@ -419,11 +414,6 @@ func DeleteInstance(instance models.Instance) {
 		}
 	}
 	models.DeleteInstance(&instance)
-	err := os.RemoveAll(config.GetAppLocalPath(instance.Name))
-	if err != nil {
-		log.Println(err)
-	}
-	// models.AddEventLog(instance.Id, models.DELETE_EVENT, "")
 }
 
 func GetInstanceLog(instance models.Instance) string {
