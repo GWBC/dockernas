@@ -69,7 +69,6 @@
           <div class="first_input">{{ param.prompt }}</div>
           <el-tree-select class="w-50 m-2 big_input" size="large" v-model="param.value" check-strictly filterable
             allow-create lazy :load="loadNode">
-            <template #default="{ data: { name } }">{{ name }}</template>
           </el-tree-select>
         </div>
         <div class="input_div" v-for="param in instanceParam.envParams" v-show="param.hide == false" :key="param.prompt">
@@ -125,7 +124,7 @@ export default {
       },
 
       dialogTableVisible: false,
-      appVersions: [],
+      appVersions: [], 
       title: this.$t("store.instanceApp"),
 
       networkModes: [
@@ -135,29 +134,24 @@ export default {
   },
   methods: {
     loadNode(node, resolve) {
-      console.log(node.data);
-      if (node.isLeaf) return resolve([]);
-      var curPath = node.data.value;
-      if (curPath == null) {
-        resolve([
-          {
-            name: "/",
-            value: "/",
-            label: "/",
-          },
-        ]);
+      if (node.isLeaf) return resolve([])
+      if (node.data.name) {
+        console.log("LoadNode:" + JSON.stringify(node.data));
+      }
+
+      if (!node.data.value) {
+        getDfsDirs("/").then((response) => {
+          console.log("LoadNode Rsp:" + JSON.stringify(response.data))
+          resolve(response.data.list);
+        });
       } else {
-        getDfsDirs(curPath).then((response) => {
-          console.log(response.data);
+        getDfsDirs(node.data.value).then((response) => {
+          console.log("LoadNode Rsp:" + JSON.stringify(response.data))
           resolve(response.data.list);
         });
       }
     },
     showDialog() {
-      this.appVersions = [];
-      for (let d of this.app.dockerVersions) {
-        this.appVersions.push(d.version);
-      }
       this.dialogTableVisible = true;
     },
     setParams(instanceParam) {
@@ -168,6 +162,11 @@ export default {
       this.instanceParam.iconUrl = app.iconUrl;
       this.instanceParam.appUrl = app.url;
       this.instanceParam.appName = app.name;
+
+      this.appVersions = [];
+      for (let d of this.app.dockerVersions) {
+        this.appVersions.push(d.version);
+      }
     },
     setAppName(name) {
       getAppsByName(name).then((response) => {

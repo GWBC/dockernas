@@ -137,11 +137,6 @@ export default {
     initData(instance) {
       this.instance = instance;
       this.instanceParam = JSON.parse(this.instance.instanceParamStr);
-
-      this.$refs.createCard.setAppName(this.instance.appName);
-      this.$refs.createCard.setEditMode();
-      this.$refs.createCard.setParams(this.instanceParam);
-
       this.autoRefresh();
     },
     autoRefresh() {
@@ -195,6 +190,11 @@ export default {
           });
     },
     edit() {
+      let appName = this.instance.appName;
+      let instanceParam = this.instanceParam;
+      this.$refs.createCard.setEditMode();
+      this.$refs.createCard.setAppName(appName);     
+      this.$refs.createCard.setParams(instanceParam);
       this.$refs.createCard.showDialog();
     },
   },

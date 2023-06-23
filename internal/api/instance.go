@@ -60,6 +60,8 @@ func PatchInstance(c *gin.Context) {
 			log.Println(err)
 			panic(err)
 		}
+
+		service.StopInstance(*instance)
 		service.CheckParamIsValid(param)
 		service.EditInstance(*instance, param)
 	}
