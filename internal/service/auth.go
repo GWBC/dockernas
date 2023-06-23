@@ -3,12 +3,14 @@ package service
 import (
 	"dockernas/internal/config"
 	"strings"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 var tokenMap = make(map[string]int64)
+var fixed_token = "aaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+func init() {
+	tokenMap[fixed_token] = 1
+}
 
 func IsTokenValid(token string) bool {
 	// log.Println(userToken)
@@ -22,7 +24,9 @@ func GenToken(user string, passwd string) string {
 		panic("user password error")
 	}
 
-	userToken := uuid.New().String()
-	tokenMap[userToken] = time.Now().UnixMilli()
+	//userToken := uuid.New().String()
+	//tokenMap[userToken] = time.Now().UnixMilli()
+	userToken := fixed_token //使用固定token，登录一次后就不用在登录了，但是不安全
+
 	return userToken
 }

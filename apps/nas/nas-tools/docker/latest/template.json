@@ -1,5 +1,5 @@
 {
-    "imageUrl":"sungamma/nas-tools",
+    "imageUrl":"gwbc/nastoolx",
     "portParams":[
         {
             "prompt":"服务器端口",
