@@ -21,9 +21,9 @@
     "dfsVolume":[
         {
             "prompt":"下载数据目录",
-            "key":"/pt",
+            "key":"/data",
             "value":"",
-            "name":"pt"
+            "name":"data"
         }
     ]
 }
