@@ -11,8 +11,6 @@ func Authentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		path := c.Request.URL.Path
 		token := c.Request.Header.Get("token")
-		// log.Println(token)
-		// log.Println(path)
 
 		if path == "/api/icon" {
 			token = c.Query("token")

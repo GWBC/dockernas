@@ -52,5 +52,5 @@ func SaveConfig() {
 }
 
 func GetDockerNASVersion() string {
-	return "0.3.0"
+	return "1.0.0"
 }
