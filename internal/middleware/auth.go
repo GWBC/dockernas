@@ -25,7 +25,7 @@ func Authentication() gin.HandlerFunc {
 		} else if path == "/api/login" {
 			c.Next()
 		} else {
-			if service.IsTokenValid(token) == false {
+			if !service.IsTokenValid(token) {
 				c.JSON(555, gin.H{"msg": "Authentication error"})
 				c.Abort()
 			} else {
