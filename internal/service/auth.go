@@ -10,14 +10,19 @@ import (
 )
 
 var tokenMap = make(map[string]int64)
-var fixed_token = "nastools"
+var fixed_token = ""
 
 func init() {
 	netInterfaces, _ := net.Interfaces()
-	if len(netInterfaces) != 0 {
-		fixed_token = base64.StdEncoding.EncodeToString([]byte(netInterfaces[0].HardwareAddr))
-	} else {
-		bMd5 := md5.Sum([]byte(fixed_token))
+	for _, v := range netInterfaces {
+		fixed_token = base64.StdEncoding.EncodeToString([]byte(v.HardwareAddr))
+		if len(fixed_token) != 0 {
+			break
+		}
+	}
+
+	if len(fixed_token) == 0 {
+		bMd5 := md5.Sum([]byte("nasdocker"))
 		fixed_token = base64.StdEncoding.EncodeToString(bMd5[:])
 	}
 
